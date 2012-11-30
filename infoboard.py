@@ -41,19 +41,28 @@ class Spotlight(Gtk.Box):
         self.add(url_to_image(user[u'avatar'], user[u'gravatar']))
         event_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         if event[u'type'] == "CreateEvent":
-            event_box.add(Gtk.Label("{0} created a new {1}."
-                .format(user[u'name'], event[u'payload']['ref_type'])))
+            new_type = event[u'payload']['ref_type']
+            if new_type == 'repository':
+                event_box.add(Gtk.Label("{0} created a new {1}, {2}."
+                    .format(user[u'name'], new_type, event[u'repo'])))
+            else:
+                event_box.add(Gtk.Label("{0} created a new {1} in {2}."
+                    .format(user[u'name'], new_type, event[u'repo'])))
             event_box.add(Gtk.Label(event[u'payload']['description']))
         elif event[u'type'] == "IssueCommentEvent":
-            event_box.add(Gtk.Label("{0} commented on an issue."
-                .format(user[u'name'])))
+            event_box.add(Gtk.Label("{0} commented on an issue in {1}."
+                .format(user[u'name'], event['repo'])))
             comment = event.children.get(event[u'comment'])
             event_box.add(Gtk.Label(comment[u'body']))
         elif event[u'type'] == "PushEvent":
-            event_box.add(Gtk.Label("{0} pushed {1} commits."
-                .format(user[u'name'], len(event[u'payload']['commits']))))
+            event_box.add(Gtk.Label("{0} pushed {1} commit(s) to {2}."
+                .format(user[u'name'], len(event[u'payload']['commits']),
+                        event[u'repo'])))
             for commit in event[u'payload']['commits']:
                 event_box.add(Gtk.Label(commit['message']))
+        elif event[u'type'] == "WatchEvent":
+            event_box.add(Gtk.Label("{0} is now watching {1}"
+                .format(user[u'name'], event[u'repo'])))
         else:
             event_box.add(Gtk.Label(event['type']))
         self.add(event_box)
