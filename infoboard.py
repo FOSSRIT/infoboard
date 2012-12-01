@@ -27,11 +27,13 @@ class InfoWin(Gtk.Window):
         self.g = Github()
         self.org = self.g.get_organization(ORG)
 
+        scrolls = Gtk.ScrolledWindow()
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         latest_events = self.org.get_events()[:10]
         for event in latest_events:
             box.add(Spotlight(event_info(event)))
-        self.add(box)
+        scrolls.add_with_viewport(box)
+        self.add(scrolls)
 
 
 class Spotlight(Gtk.Box):
