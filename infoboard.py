@@ -56,11 +56,21 @@ class Spotlight(Gtk.Box):
                 event_box.add(Gtk.Label("{0} created a new {1} in {2}."
                     .format(user[u'name'], new_type, event[u'repo'])))
             event_box.add(Gtk.Label(event[u'payload']['description']))
+        elif event[u'type'] == "ForkEvent":
+            event_box.add(Gtk.Label("{0} forked {1} to {2}"
+                .format(user[u'name'], event[u'repo'],
+                        event[u'payload']['forkee']['full_name'])))
         elif event[u'type'] == "IssueCommentEvent":
-            event_box.add(Gtk.Label("{0} commented on an issue in {1}."
-                .format(user[u'name'], event['repo'])))
+            issue = Entity.by_name(event['issue'])
+            event_box.add(Gtk.Label("{0} commented on issue #{1} in {2}."
+                .format(user[u'name'], issue['number'], event['repo'])))
             comment = Entity.by_name(event[u'comment'])
             event_box.add(Gtk.Label(comment[u'body']))
+        elif event[u'type'] == "IssuesEvent":
+            issue = Entity.by_name(event['issue'])
+            event_box.add(Gtk.Label("{0} {1} issue #{2} in {3}."
+                .format(user[u'name'], event['payload']['action'],
+                        issue['number'], event['repo'])))
         elif event[u'type'] == "PushEvent":
             event_box.add(Gtk.Label("{0} pushed {1} commit(s) to {2}."
                 .format(user[u'name'], len(event[u'payload']['commits']),
