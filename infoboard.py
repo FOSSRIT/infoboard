@@ -14,10 +14,13 @@ ORG = "FOSSRIT"
 # Setup caching
 base_dir = os.path.split(__file__)[0]
 from sqlalchemy import create_engine
-from knowledge.model import init_model, metadata, DBSession, Entity
+from knowledge.model import init_model, metadata, Entity
 engine = create_engine('sqlite://{0}/knowledge.db'.format(base_dir))
 init_model(engine)
 metadata.create_all(engine)
+
+# Yes, I know.  I swear there's nothing sketchy in here.
+from data import *
 
 
 class InfoWin(Gtk.Window):
@@ -79,43 +82,6 @@ def url_to_image(url, filename):
     img = Gtk.Image.new_from_file(local_path)
     return img
 
-
-def event_info(event):
-    event_name = u'event_{0}'.format(event.id)
-    if not Entity.by_name(event_name):
-        entity = Entity(event_name)
-        actor = user_info(event.actor)
-        entity[u'actor'] = actor.name
-        entity.append(actor)
-        entity[u'repo'] = event.repo.name
-        entity[u'type'] = event.type
-        entity[u'payload'] = event.payload
-        if event.type == "IssueCommentEvent":
-            comment = comment_info(event.payload['comment'])
-            entity.append(comment)
-            entity[u'comment'] = comment.name
-        DBSession.add(entity)
-    return Entity.by_name(event_name)
-
-
-def user_info(user):
-    user_name = u'user_{0}'.format(user.id)
-    if not Entity.by_name(user_name):
-        entity = Entity(user_name)
-        entity[u'avatar'] = user.avatar_url
-        entity[u'gravatar'] = user.gravatar_id
-        entity[u'name'] = user.name
-        DBSession.add(entity)
-    return Entity.by_name(user_name)
-
-
-def comment_info(comment):
-    comment_name = u'comment_{0}'.format(comment['id'])
-    if not Entity.by_name(comment_name):
-        entity = Entity(comment_name)
-        entity[u'body'] = comment['body']
-        DBSession.add(entity)
-    return Entity.by_name(comment_name)
 
 
 if __name__ == "__main__":
