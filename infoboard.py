@@ -41,7 +41,7 @@ class InfoWin(Gtk.Window):
 class Spotlight(Gtk.Box):
     def __init__(self, event):
         super(Spotlight, self).__init__()
-        user = event.children.get(event[u'actor'])
+        user = Entity.by_name(event[u'actor'])
         self.add(url_to_image(user[u'avatar'], user[u'gravatar']))
         event_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         if event[u'type'] == "CreateEvent":
@@ -56,7 +56,7 @@ class Spotlight(Gtk.Box):
         elif event[u'type'] == "IssueCommentEvent":
             event_box.add(Gtk.Label("{0} commented on an issue in {1}."
                 .format(user[u'name'], event['repo'])))
-            comment = event.children.get(event[u'comment'])
+            comment = Entity.by_name(event[u'comment'])
             event_box.add(Gtk.Label(comment[u'body']))
         elif event[u'type'] == "PushEvent":
             event_box.add(Gtk.Label("{0} pushed {1} commit(s) to {2}."
