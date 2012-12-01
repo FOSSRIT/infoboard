@@ -25,6 +25,8 @@ class InfoWin(Gtk.Window):
         super(InfoWin, self).__init__()
         self.set_default_size(600, 800)
         self.g = Github()
+        print("You have {0} of {1} calls left this hour."
+            .format(*self.g.rate_limiting))
         self.org = self.g.get_organization(ORG)
 
         scrolls = Gtk.ScrolledWindow()
