@@ -6,7 +6,7 @@ import os
 
 from urllib import urlretrieve
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf, Gdk
 from github import Github
 
 ORGS = ["FOSSRIT", 'nycapitolcamp']
@@ -48,11 +48,12 @@ class InfoWin(Gtk.Window):
         self.add(scrolls)
 
 
-class Spotlight(Gtk.Box):
+class Spotlight(Gtk.EventBox):
     def __init__(self, event):
         super(Spotlight, self).__init__()
         user = Entity.by_name(event[u'actor'])
-        self.add(url_to_image(user[u'avatar'], user[u'gravatar']))
+        box = Gtk.Box()
+        box.add(url_to_image(user[u'avatar'], user[u'gravatar']))
         event_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         if event[u'type'] == "CommitCommentEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFDDBD"))
@@ -111,6 +112,7 @@ class Spotlight(Gtk.Box):
                         event['payload']['number'], event['repo'])))
     #PullRequestReviewCommentEvent
         elif event[u'type'] == "PushEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C9FFC1"))
             event_box.add(Gtk.Label("{0} pushed {1} commit(s) to {2}."
                 .format(user[u'name'], len(event[u'payload']['commits']),
                         event[u'repo'])))
@@ -118,11 +120,14 @@ class Spotlight(Gtk.Box):
                 event_box.add(Gtk.Label(commit['message']))
     #TeamAddEvent
         elif event[u'type'] == "WatchEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFFF80"))
             event_box.add(Gtk.Label("{0} is now watching {1}"
                 .format(user[u'name'], event[u'repo'])))
         else:
             event_box.add(Gtk.Label(event['type']))
-        self.add(event_box)
+        event_box.add(Gtk.Label(event.name))
+        box.add(event_box)
+        self.add(box)
 
 
 def url_to_image(url, filename):
