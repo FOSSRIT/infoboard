@@ -31,7 +31,11 @@ def user_info(user):
         entity = Entity(user_name)
         entity[u'avatar'] = user.avatar_url
         entity[u'gravatar'] = user.gravatar_id
-        entity[u'name'] = user.name
+        # Not everyone has set a name for their account.
+        if user.name:
+            entity[u'name'] = user.name
+        else:
+            entity[u'name'] = user.login
         DBSession.add(entity)
     return Entity.by_name(user_name)
 
