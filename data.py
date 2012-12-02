@@ -15,7 +15,7 @@ def event_info(event):
         entity[u'repo'] = event.repo.name
         entity[u'type'] = event.type
         entity[u'payload'] = event.payload
-        if event.type == "IssueCommentEvent":
+        if event.type in ["CommitCommentEvent", "IssueCommentEvent"]:
             entity[u'comment'] = comment_info(event.payload['comment']).name
         if event.type in ["IssueCommentEvent", "IssuesEvent"]:
             entity['issue'] = issue_info(event.payload['issue']).name

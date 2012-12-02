@@ -54,7 +54,14 @@ class Spotlight(Gtk.Box):
         user = Entity.by_name(event[u'actor'])
         self.add(url_to_image(user[u'avatar'], user[u'gravatar']))
         event_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        if event[u'type'] == "CreateEvent":
+        if event[u'type'] == "CommitCommentEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFDDBD"))
+            event_box.add(Gtk.Label("{0} commented on a commit in {1}."
+                .format(user[u'name'], event['repo'])))
+            comment = Entity.by_name(event[u'comment'])
+            event_box.add(Gtk.Label(comment[u'body']))
+        elif event[u'type'] == "CreateEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
             new_type = event[u'payload']['ref_type']
             if new_type == 'repository':
                 event_box.add(Gtk.Label("{0} created a new {1}, {2}."
@@ -63,27 +70,53 @@ class Spotlight(Gtk.Box):
                 event_box.add(Gtk.Label("{0} created a new {1} in {2}."
                     .format(user[u'name'], new_type, event[u'repo'])))
             event_box.add(Gtk.Label(event[u'payload']['description']))
+    #DeleteEvent
+    #DownloadEvent
+        elif event[u'type'] == "FollowEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFFF80"))
+            event_box.add(Gtk.Label("{0} is now following {1}."
+                .format(user[u'name'], event['payload']['target']['name'])))
         elif event[u'type'] == "ForkEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
             event_box.add(Gtk.Label("{0} forked {1} to {2}"
                 .format(user[u'name'], event[u'repo'],
                         event[u'payload']['forkee']['full_name'])))
+    #ForkApplyEvent
+        elif event[u'type'] == "GistEvent":
+            event_box.add(Gtk.Label("{0} {1}d a gist"
+                .format(user[u'name'], event['payload']['action'])))
+    #GollumEvent
         elif event[u'type'] == "IssueCommentEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFDDBD"))
             issue = Entity.by_name(event['issue'])
             event_box.add(Gtk.Label("{0} commented on issue #{1} in {2}."
                 .format(user[u'name'], issue['number'], event['repo'])))
             comment = Entity.by_name(event[u'comment'])
+            event_box.add(Gtk.Label(issue[u'title']))
             event_box.add(Gtk.Label(comment[u'body']))
         elif event[u'type'] == "IssuesEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
             issue = Entity.by_name(event['issue'])
             event_box.add(Gtk.Label("{0} {1} issue #{2} in {3}."
                 .format(user[u'name'], event['payload']['action'],
                         issue['number'], event['repo'])))
+            event_box.add(Gtk.Label(issue[u'title']))
+    #MemberEvent
+    #PublicEvent
+        elif event[u'type'] == "PullRequestEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
+            # request = Entity.by_name(event['request'])
+            event_box.add(Gtk.Label("{0} {1} pull request #{2} in {3}."
+                .format(user[u'name'], event['payload']['action'],
+                        event['payload']['number'], event['repo'])))
+    #PullRequestReviewCommentEvent
         elif event[u'type'] == "PushEvent":
             event_box.add(Gtk.Label("{0} pushed {1} commit(s) to {2}."
                 .format(user[u'name'], len(event[u'payload']['commits']),
                         event[u'repo'])))
             for commit in event[u'payload']['commits']:
                 event_box.add(Gtk.Label(commit['message']))
+    #TeamAddEvent
         elif event[u'type'] == "WatchEvent":
             event_box.add(Gtk.Label("{0} is now watching {1}"
                 .format(user[u'name'], event[u'repo'])))
