@@ -43,6 +43,8 @@ class InfoWin(Gtk.Window):
         scrolls = Gtk.ScrolledWindow()
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         for event in events:
+            if event.type in ['DownloadEvent']:
+                continue
             box.add(Spotlight(event_info(event)))
         scrolls.add_with_viewport(box)
         self.add(scrolls)
