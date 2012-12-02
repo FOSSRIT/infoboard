@@ -9,7 +9,8 @@ from urllib import urlretrieve
 from gi.repository import Gtk, GdkPixbuf
 from github import Github
 
-ORG = "FOSSRIT"
+ORGS = ["FOSSRIT", 'nycapitolcamp']
+USERS = ['Qalthos', 'oddshocks', 'rossdylan', 'ryansb', 'ralphbean']
 
 # Setup caching
 base_dir = os.path.split(__file__)[0]
@@ -27,15 +28,21 @@ class InfoWin(Gtk.Window):
     def __init__(self):
         super(InfoWin, self).__init__()
         self.set_default_size(600, 800)
-        self.g = Github()
-        print("You have {0} of {1} calls left this hour."
-            .format(*self.g.rate_limiting))
-        self.org = self.g.get_organization(ORG)
+
+        events = set()
+        for org in ORGS:
+            org = g.get_organization(org)
+            events.update(org.get_events()[:25])
+        for user in USERS:
+            user = g.get_user(user)
+            events.update(user.get_events()[:5])
+
+        # There is no set.sort(), so use sorted and overwrite
+        events = sorted(events, key=lambda event: event.created_at, reverse=True)
 
         scrolls = Gtk.ScrolledWindow()
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        latest_events = self.org.get_events()[:10]
-        for event in latest_events:
+        for event in events:
             box.add(Spotlight(event_info(event)))
         scrolls.add_with_viewport(box)
         self.add(scrolls)
@@ -96,8 +103,9 @@ def url_to_image(url, filename):
     return img
 
 
-
 if __name__ == "__main__":
+    g = Github()
+    print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
     win = InfoWin()
     win.connect("delete-event", Gtk.main_quit)
     win.show_all()
