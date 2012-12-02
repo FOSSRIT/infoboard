@@ -6,7 +6,7 @@ import os
 
 from urllib import urlretrieve
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 from github import Github
 
 ORG = "FOSSRIT"
@@ -89,7 +89,10 @@ def url_to_image(url, filename):
     local_path = os.path.join(base_dir, "image_cache", filename)
     if not os.path.exists(local_path):
         urlretrieve(url, local_path)
-    img = Gtk.Image.new_from_file(local_path)
+    # Resize files to 80px x 80px
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(local_path)
+    pixbuf = pixbuf.scale_simple(80, 80, GdkPixbuf.InterpType.BILINEAR)
+    img = Gtk.Image.new_from_pixbuf(pixbuf)
     return img
 
 
