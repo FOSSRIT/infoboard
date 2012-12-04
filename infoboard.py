@@ -32,20 +32,22 @@ class InfoWin(Gtk.Window):
         events = set()
         for org in ORGS:
             org = g.get_organization(org)
-            events.update(org.get_events()[:25])
+            eventities = map(event_info, org.get_events()[:10])
+            events.update(eventities)
         for user in USERS:
             user = g.get_user(user)
-            events.update(user.get_events()[:5])
+            eventities = map(event_info, user.get_events()[:5])
+            events.update(eventities)
 
         # There is no set.sort(), so use sorted and overwrite
-        events = sorted(events, key=lambda event: event.created_at, reverse=True)
+        events = sorted(events, key=lambda event: event[u'created_at'], reverse=True)
 
         scrolls = Gtk.ScrolledWindow()
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         for event in events:
-            if event.type in ['DownloadEvent']:
+            if event[u'type'] in ['DownloadEvent']:
                 continue
-            box.add(Spotlight(event_info(event)))
+            box.add(Spotlight(event))
         scrolls.add_with_viewport(box)
         self.add(scrolls)
 
@@ -127,7 +129,6 @@ class Spotlight(Gtk.EventBox):
                 .format(user[u'name'], event[u'repo'])))
         else:
             event_box.add(Gtk.Label(event['type']))
-        event_box.add(Gtk.Label(event.name))
         box.add(event_box)
         self.add(box)
 
