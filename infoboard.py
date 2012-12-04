@@ -9,8 +9,9 @@ from urllib import urlretrieve
 from gi.repository import Gtk, GdkPixbuf, Gdk
 from github import Github
 
-ORGS = ["FOSSRIT", 'nycapitolcamp']
-USERS = ['Qalthos', 'oddshocks', 'rossdylan', 'ryansb', 'ralphbean']
+ORGS = ['FOSSRIT']
+USERS = ['Qalthos', 'oddshocks', 'rossdylan', 'ryansb',
+         'ralphbean', 'decause', 'lmacken']
 
 # Setup caching
 base_dir = os.path.split(__file__)[0]
