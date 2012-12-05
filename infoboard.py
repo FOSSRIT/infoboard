@@ -47,9 +47,6 @@ class InfoWin(Gtk.Window):
                 eventities = map(event_info, user.get_events())
             new_events.update(eventities)
 
-        #Remove all the events already on the board
-        new_events.difference_update(extant_events)
-
         # There is no set.sort(), so use sorted and overwrite
         new_events = sorted(new_events, key=lambda event: event[u'created_at'], reverse=True)
 
@@ -57,12 +54,10 @@ class InfoWin(Gtk.Window):
         blacklist = ['DownloadEvent']
         new_events = filter(lambda event: event[u'type'] not in blacklist, new_events)
 
-        for event in new_events:
-            self.box.pack_start(Spotlight(event), True, False, 2)
+        self.box.foreach(lambda child, ignore: self.box.remove(child), None)
 
-        events = self.box.get_children()
-        for event in events[self.max_size:]:
-            self.box.remove(event)
+        for event in new_events[:self.max_size]:
+            self.box.pack_start(Spotlight(event), True, False, 2)
         self.box.show_all()
 
         print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
