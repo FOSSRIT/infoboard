@@ -54,10 +54,12 @@ class InfoWin(Gtk.Window):
         blacklist = ['DownloadEvent']
         new_events = filter(lambda event: event[u'type'] not in blacklist, new_events)
 
-        self.box.foreach(lambda child, ignore: self.box.remove(child), None)
+        #self.box.foreach(lambda child, ignore: self.box.remove(child), None)
 
         for event in new_events[:self.max_size]:
             self.box.pack_start(Spotlight(event), True, False, 2)
+            if event in extant_events:
+                break
         self.box.show_all()
 
         print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
