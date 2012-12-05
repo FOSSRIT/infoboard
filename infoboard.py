@@ -6,7 +6,7 @@ import os
 
 from urllib import urlretrieve
 
-from gi.repository import Gtk, GdkPixbuf, Gdk
+from gi.repository import Gtk, GdkPixbuf, Gdk, GObject
 from github import Github
 
 ORGS = ['FOSSRIT']
@@ -36,6 +36,7 @@ class InfoWin(Gtk.Window):
         scrolls.add_with_viewport(self.box)
         self.add(scrolls)
         self.add_more_events()
+        GObject.timeout_add(3600000, self.add_more_events)
 
     def add_more_events(self):
         extant_events = set(map(lambda spot: spot.event, self.box.get_children()))
