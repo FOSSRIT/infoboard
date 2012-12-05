@@ -67,6 +67,7 @@ class InfoWin(Gtk.Window):
         for event in events[self.max_size:]:
             self.box.remove(event)
 
+        print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
         return True
 
 
@@ -172,7 +173,6 @@ def url_to_image(url, filename):
 
 if __name__ == "__main__":
     g = Github()
-    print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
     win = InfoWin()
     win.connect("delete-event", Gtk.main_quit)
     win.show_all()
