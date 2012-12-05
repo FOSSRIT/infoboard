@@ -9,9 +9,7 @@ from urllib import urlretrieve
 from gi.repository import Gtk, GdkPixbuf, Gdk, GObject
 from github import Github
 
-ORGS = ['FOSSRIT']
-USERS = ['Qalthos', 'oddshocks', 'rossdylan', 'ryansb',
-         'ralphbean', 'decause', 'lmacken']
+ORG = 'FOSSRIT'
 
 # Setup caching
 base_dir = os.path.split(__file__)[0]
@@ -41,13 +39,15 @@ class InfoWin(Gtk.Window):
     def add_more_events(self):
         extant_events = set(map(lambda spot: spot.event, self.box.get_children()))
         new_events = set()
-        for org in ORGS:
-            org = g.get_organization(org)
-            eventities = map(event_info, org.get_events()[:10])
-            new_events.update(eventities)
-        for user in USERS:
-            user = g.get_user(user)
-            eventities = map(event_info, user.get_events()[:5])
+        org = g.get_organization(ORG)
+        #eventities = map(event_info, org.get_events()[:10])
+        #new_events.update(eventities)
+        for user in org.get_members():
+            #user = g.get_user(user)
+            try:
+                eventities = map(event_info, user.get_events()[:5])
+            except IndexError:
+                eventities = map(event_info, user.get_events())
             new_events.update(eventities)
 
         #Remove all the events already on the board
