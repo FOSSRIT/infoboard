@@ -66,6 +66,7 @@ class InfoWin(Gtk.Window):
         events = self.box.get_children()
         for event in events[self.max_size:]:
             self.box.remove(event)
+        self.box.show_all()
 
         print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
         return True
