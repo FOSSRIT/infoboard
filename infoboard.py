@@ -56,10 +56,10 @@ class InfoWin(Gtk.Window):
 
         #self.box.foreach(lambda child, ignore: self.box.remove(child), None)
 
-        for event in new_events[:self.max_size]:
+        for event in reversed(new_events[:self.max_size]):
             if event in extant_events:
-                break
-            self.box.pack_start(Spotlight(event), True, False, 2)
+                continue
+            self.box.pack_end(Spotlight(event), True, False, 2)
         self.box.show_all()
 
         print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
