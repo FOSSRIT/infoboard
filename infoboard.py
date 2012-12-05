@@ -135,7 +135,17 @@ class Spotlight(Gtk.EventBox):
                 .format(user_name, event['payload']['action'],
                         issue['number'], event['repo'])))
             event_box.add(Gtk.Label(issue[u'title']))
-    #MemberEvent
+        elif event[u'type'] == "MemberEvent":
+            #self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#??????"))
+            try:
+                event_box.add(Gtk.Label("{0} added {1} as a collaborator to {2}."
+                    .format(user_name, event['payload']['member']['name'],
+                            event['repo'])))
+            except KeyError:
+                event_box.add(Gtk.Label("{0} added {1} as a collaborator to {2}."
+                    .format(user_name, event['payload']['member']['login'],
+                            event['repo'])))
+
     #PublicEvent
         elif event[u'type'] == "PullRequestEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
