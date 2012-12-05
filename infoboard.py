@@ -28,34 +28,51 @@ from data import *
 class InfoWin(Gtk.Window):
     def __init__(self):
         super(InfoWin, self).__init__()
+        self.max_size = 20
         self.set_default_size(600, 800)
 
-        events = set()
+        scrolls = Gtk.ScrolledWindow()
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        scrolls.add_with_viewport(self.box)
+        self.add(scrolls)
+        self.add_more_events()
+
+    def add_more_events(self):
+        extant_events = set(map(lambda spot: spot.event, self.box.get_children()))
+        new_events = set()
         for org in ORGS:
             org = g.get_organization(org)
             eventities = map(event_info, org.get_events()[:10])
-            events.update(eventities)
+            new_events.update(eventities)
         for user in USERS:
             user = g.get_user(user)
             eventities = map(event_info, user.get_events()[:5])
-            events.update(eventities)
+            new_events.update(eventities)
+
+        #Remove all the events already on the board
+        new_events.difference_update(extant_events)
 
         # There is no set.sort(), so use sorted and overwrite
-        events = sorted(events, key=lambda event: event[u'created_at'], reverse=True)
+        new_events = sorted(new_events, key=lambda event: event[u'created_at'], reverse=True)
 
-        scrolls = Gtk.ScrolledWindow()
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        for event in events:
-            if event[u'type'] in ['DownloadEvent']:
-                continue
-            box.add(Spotlight(event))
-        scrolls.add_with_viewport(box)
-        self.add(scrolls)
+        # Remove all the uninteresting events
+        blacklist = ['DownloadEvent']
+        new_events = filter(lambda event: event[u'type'] not in blacklist, new_events)
+
+        for event in new_events:
+            self.box.pack_start(Spotlight(event), True, False, 2)
+
+        events = self.box.get_children()
+        for event in events[self.max_size:]:
+            self.box.remove(event)
+
+        return True
 
 
 class Spotlight(Gtk.EventBox):
     def __init__(self, event):
         super(Spotlight, self).__init__()
+        self.event = event
         user = Entity.by_name(event[u'actor'])
         user_name = user[u'name'].encode('utf-8')
         box = Gtk.Box()
