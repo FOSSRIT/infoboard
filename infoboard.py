@@ -110,9 +110,16 @@ class Spotlight(Gtk.EventBox):
                         event['payload']['target']['name'].encode('utf-8'))))
         elif event[u'type'] == "ForkEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
-            event_box.add(Gtk.Label("{0} forked {1} to {2}"
-                .format(user_name, event[u'repo'],
-                        event[u'payload']['forkee']['full_name'])))
+            try:
+                event_box.add(Gtk.Label("{0} forked {1} to {2}."
+                    .format(user_name, event[u'repo'],
+                            event[u'payload']['forkee']['full_name'])))
+            except KeyError:
+                event_box.add(Gtk.Label("{0} forked {1} to {2}/{3}."
+                    .format(user_name, event[u'repo'],
+                            event[u'payload']['forkee']['owner']['login'],
+                            event[u'payload']['forkee']['name'])))
+
     #ForkApplyEvent
         elif event[u'type'] == "GistEvent":
             event_box.add(Gtk.Label("{0} {1}d a gist"
