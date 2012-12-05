@@ -40,10 +40,7 @@ class InfoWin(Gtk.Window):
         extant_events = set(map(lambda spot: spot.event, self.box.get_children()))
         new_events = set()
         org = g.get_organization(ORG)
-        #eventities = map(event_info, org.get_events()[:10])
-        #new_events.update(eventities)
         for user in org.get_members():
-            #user = g.get_user(user)
             try:
                 eventities = map(event_info, user.get_events()[:5])
             except IndexError:
