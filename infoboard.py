@@ -19,8 +19,7 @@ engine = create_engine('sqlite://{0}/knowledge.db'.format(base_dir))
 init_model(engine)
 metadata.create_all(engine)
 
-# Yes, I know.  I swear there's nothing sketchy in here.
-from data import *
+import data
 
 
 class InfoWin(Gtk.Window):
@@ -42,9 +41,9 @@ class InfoWin(Gtk.Window):
         org = g.get_organization(ORG)
         for user in org.get_members():
             try:
-                eventities = map(event_info, user.get_events()[:5])
+                eventities = map(data.event_info, user.get_events()[:5])
             except IndexError:
-                eventities = map(event_info, user.get_events())
+                eventities = map(data.event_info, user.get_events())
             new_events.update(eventities)
 
         # There is no set.sort(), so use sorted and overwrite
