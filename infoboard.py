@@ -113,7 +113,6 @@ class Spotlight(Gtk.EventBox):
                     .format(user_name, event[u'repo'],
                             event[u'payload']['forkee']['owner']['login'],
                             event[u'payload']['forkee']['name'])))
-
     #ForkApplyEvent
         elif event[u'type'] == "GistEvent":
             event_box.add(Gtk.Label("{0} {1}d a gist"
@@ -144,7 +143,6 @@ class Spotlight(Gtk.EventBox):
                 event_box.add(Gtk.Label("{0} added {1} as a collaborator to {2}."
                     .format(user_name, event['payload']['member']['login'],
                             event['repo'])))
-
     #PublicEvent
         elif event[u'type'] == "PullRequestEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
