@@ -33,7 +33,7 @@ class InfoWin(Gtk.Window):
         scrolls.add_with_viewport(self.box)
         self.add(scrolls)
         self.add_more_events(data.recent_events())
-        GObject.timeout_add(3600000, self.add_more_events)
+        GObject.timeout_add(360000, self.add_more_events)
 
     def add_more_events(self, initial=None):
         extant_events = set(map(lambda spot: spot.event, self.box.get_children()))
