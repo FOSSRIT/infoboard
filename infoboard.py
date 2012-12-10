@@ -91,12 +91,6 @@ class Spotlight(Gtk.EventBox):
         elif event[u'type'] == "CreateEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
             new_type = event[u'payload']['ref_type']
-            event_box.add(Gtk.Label("{0} created a new {1} in {2}."
-                .format(user_name, new_type, event[u'repo'])))
-            event_box.add(Gtk.Label(event[u'payload']['description']))
-        elif event[u'type'] == "DeleteEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
-            new_type = event[u'payload']['ref_type']
             if new_type == 'repository':
                 event_box.add(Gtk.Label("{0} created a new {1}, {2}."
                     .format(user_name, new_type, event[u'repo'])))
@@ -104,6 +98,11 @@ class Spotlight(Gtk.EventBox):
                 event_box.add(Gtk.Label("{0} created a new {1} in {2}."
                     .format(user_name, new_type, event[u'repo'])))
             event_box.add(Gtk.Label(event[u'payload']['description']))
+        elif event[u'type'] == "DeleteEvent":
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
+            new_type = event[u'payload']['ref_type']
+            event_box.add(Gtk.Label("{0} deleted a {1} in {2}."
+                .format(user_name, new_type, event[u'repo'])))
     #DownloadEvent
         elif event[u'type'] == "FollowEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFFF80"))
