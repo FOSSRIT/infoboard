@@ -32,12 +32,15 @@ class InfoWin(Gtk.Window):
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         scrolls.add_with_viewport(self.box)
         self.add(scrolls)
-        self.add_more_events()
+        self.add_more_events(data.recent_events())
         GObject.timeout_add(3600000, self.add_more_events)
 
-    def add_more_events(self):
+    def add_more_events(self, initial=None):
         extant_events = set(map(lambda spot: spot.event, self.box.get_children()))
-        new_events = set()
+        if initial:
+            new_events = set(initial)
+        else:
+            new_events = set()
         org = g.get_organization(ORG)
         for user in org.get_members():
             try:
@@ -46,6 +49,8 @@ class InfoWin(Gtk.Window):
                 eventities = map(data.event_info, user.get_events())
             new_events.update(eventities)
 
+        # Remove any events already onscreen
+        new_events.difference_update(extant_events)
         # There is no set.sort(), so use sorted and overwrite
         new_events = sorted(new_events, key=lambda event: event[u'created_at'], reverse=True)
 
@@ -53,12 +58,9 @@ class InfoWin(Gtk.Window):
         blacklist = ['DownloadEvent']
         new_events = filter(lambda event: event[u'type'] not in blacklist, new_events)
 
-        #self.box.foreach(lambda child, ignore: self.box.remove(child), None)
-
         for event in reversed(new_events[:self.max_size]):
-            if event in extant_events:
-                continue
-            self.box.pack_end(Spotlight(event), True, False, 2)
+            spot_box = Spotlight(event)
+            self.box.pack_end(spot_box, True, False, 2)
         self.box.show_all()
 
         print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
