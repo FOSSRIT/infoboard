@@ -36,7 +36,7 @@ class InfoWin(Gtk.Window):
         GObject.timeout_add(360000, self.add_more_events)
 
     def add_more_events(self, initial=None):
-        extant_events = set(map(lambda spot: spot.event, self.box.get_children()))
+        extant_events = map(lambda spot: spot.event, self.box.get_children())
         if initial:
             new_events = set(initial)
         else:
@@ -50,7 +50,7 @@ class InfoWin(Gtk.Window):
             new_events.update(eventities)
 
         # Remove any events already onscreen
-        new_events.difference_update(extant_events)
+        new_events.difference_update(set(extant_events))
         # There is no set.sort(), so use sorted and overwrite
         new_events = sorted(new_events, key=lambda event: event[u'created_at'], reverse=True)
 
@@ -63,7 +63,7 @@ class InfoWin(Gtk.Window):
         for event in reversed(new_events[:size]):
             # Don't use this as an excuse to pop old events to the top of the
             # list.
-            if event[u'created_at'] < extant_events[0][u'created_at']:
+            if extant_events and event[u'created_at'] < extant_events[0][u'created_at']:
                 continue
             spot_box = Spotlight(event)
             self.box.pack_end(spot_box, True, False, 2)
