@@ -58,7 +58,13 @@ class InfoWin(Gtk.Window):
         blacklist = ['DownloadEvent']
         new_events = filter(lambda event: event[u'type'] not in blacklist, new_events)
 
-        for event in reversed(new_events[:self.max_size]):
+        # Don't try to add more events than we have.
+        size = min(len(new_events), self.max_size)
+        for event in reversed(new_events[:size]):
+            # Don't use this as an excuse to pop old events to the top of the
+            # list.
+            if event[u'created_at'] < extant_events[0][u'created_at']:
+                continue
             spot_box = Spotlight(event)
             self.box.pack_end(spot_box, True, False, 2)
         self.box.show_all()
