@@ -20,7 +20,11 @@ def event_info(event):
         print("Caching new event {0}".format(event_name))
         entity = Entity(event_name)
         entity[u'actor'] = user_info(event.actor).name
-        entity[u'repo'] = event.repo.name
+        try:
+            entity[u'repo'] = repo_info(event.repo).name
+        except:
+            # I think this means the repo no longer exists.
+            entity[u'repo'] = event.repo.name
         entity[u'type'] = event.type
         entity[u'payload'] = event.payload
         entity[u'created_at'] = event.created_at
@@ -47,6 +51,17 @@ def user_info(user):
             entity[u'name'] = user.login
         DBSession.add(entity)
     return Entity.by_name(user_name)
+
+
+def repo_info(repo):
+    repo_name = u'repo_{0}'.format(repo.id)
+    if not Entity.by_name(repo_name):
+        print("Caching new repository {0}".format(repo_name))
+        entity = Entity(repo_name)
+        entity[u'name'] = repo.full_name
+        entity[u'url'] = repo.html_url
+        DBSession.add(entity)
+    return Entity.by_name(repo_name)
 
 
 def comment_info(comment):
