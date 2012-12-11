@@ -29,14 +29,19 @@ class InfoWin(Gtk.Window):
         self.set_default_size(600, 800)
 
         scrolls = Gtk.ScrolledWindow()
-        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        scrolls.add_with_viewport(self.box)
+        super_box = Gtk.Box(homogeneous=True)
+
+        # Container for events... goes vertically down the left
+        self.event_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        super_box.add(self.event_box)
+
+        scrolls.add_with_viewport(super_box)
         self.add(scrolls)
         self.add_more_events(data.recent_events())
         GObject.timeout_add(360000, self.add_more_events)
 
     def add_more_events(self, initial=None):
-        extant_events = map(lambda spot: spot.event, self.box.get_children())
+        extant_events = map(lambda spot: spot.event, self.event_box.get_children())
         if initial:
             new_events = set(initial)
         else:
@@ -65,28 +70,35 @@ class InfoWin(Gtk.Window):
             # list.
             if extant_events and event[u'created_at'] < extant_events[0][u'created_at']:
                 continue
-            spot_box = Spotlight(event)
-            self.box.pack_end(spot_box, True, False, 2)
-        self.box.show_all()
+            spot_box = EventWidget()
+            try:
+                spot_box.populate(event)
+                self.event_box.pack_end(spot_box, True, False, 2)
+            except:
+                pass
+        self.event_box.show_all()
 
         print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
         return True
 
 
-class Spotlight(Gtk.EventBox):
-    def __init__(self, event):
-        super(Spotlight, self).__init__()
+class EventWidget(Gtk.EventBox):
+    def __init__(self):
+        super(EventWidget, self).__init__()
+        self.box = Gtk.Box()
+        self.add(self.box)
+
+    def populate(self, event):
         self.event = event
         user = Entity.by_name(event[u'actor'])
         user_name = user[u'name'].encode('utf-8')
-        box = Gtk.Box()
         repo = Entity.by_name(event[u'repo'])
         if repo:
             repo_link = '<a href="{0}">{1}</a>'.format(repo['url'], repo['name'])
         else:
             repo_link = event[u'repo']
 
-        box.add(url_to_image(user[u'avatar'], user[u'gravatar']))
+        self.box.add(url_to_image(user[u'avatar'], user[u'gravatar']))
 
         event_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         if event[u'type'] == "CommitCommentEvent":
@@ -179,8 +191,7 @@ class Spotlight(Gtk.EventBox):
                 .format(user_name, repo_link)))
         else:
             event_box.add(mk_label(event['type']))
-        box.add(event_box)
-        self.add(box)
+        self.box.pack_end(event_box, False, False, 0)
 
 
 def url_to_image(url, filename):
