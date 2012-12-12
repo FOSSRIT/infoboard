@@ -36,52 +36,38 @@ class InfoWin(Gtk.Window):
         super_box.add(self.event_box)
 
         # Container for hilights... vertically down the right
-        hilights = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
-                           homogeneous=True)
-        top_user, top_repo = data.top_contributions()
-
-        # Top user box
-        if top_user:
-            user = Hilight()
-            try:
-                user.build_user(top_user)
-                hilights.pack_start(user, True, False, 0)
-            except:
-                pass
-
-        # Top project box
-        if top_repo:
-            repo = Hilight()
-            try:
-                repo.build_repo(top_repo)
-                hilights.pack_start(repo, True, False, 0)
-            except:
-                pass
-
-        super_box.add(hilights)
+        self.hilights = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
+                                homogeneous=True)
+        super_box.add(self.hilights)
 
         scrolls.add_with_viewport(super_box)
         self.add(scrolls)
-        self.add_more_events(data.recent_events())
-        GObject.timeout_add(360000, self.add_more_events)
+        self.refresh()
+        GObject.timeout_add(360000, self.refresh)
 
-    def add_more_events(self, initial=None):
-        extant_events = map(lambda spot: spot.event, self.event_box.get_children())
-        if initial:
-            new_events = set(initial)
-        else:
-            new_events = set()
-        org = g.get_organization(ORG)
+    def refresh(self):
+        events = self.cache_new_events()
+        self.add_more_events(events)
+        self.add_hilights()
+
+        print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
+        return True
+
+    def cache_new_events(self):
+        """Pull new events from Github and return the [max_size] newest
+           events.
+        """
+        newest_events = data.recent_events(limit=self.max_size)
         try:
-            for user in org.get_members():
+            for user in self.org.get_members():
                 user_events = iter(user.get_events())
                 limit = 5
                 try:
                     while limit > 0:
                         event = data.event_info(user_events.next())
-                        if extant_events and event[u'created_at'] < extant_events[0][u'created_at']:
+                        if len(newest_events) > 0 and event[u'created_at'] < newest_events[0][u'created_at']:
                             break
-                        new_events.add(event)
+                        newest_events.append(event)
                         limit -= 1
                 except StopIteration:
                     # We ran out of items to add. Oh well.
@@ -89,32 +75,51 @@ class InfoWin(Gtk.Window):
         except:
             print("Something went wrong updating the events.")
 
-        # Remove any events already onscreen
-        new_events.difference_update(set(extant_events))
-        # There is no set.sort(), so use sorted and overwrite
-        new_events = sorted(new_events, key=lambda event: event[u'created_at'], reverse=True)
+        newest_events.sort(key=lambda event: event[u'created_at'], reverse=True)
+        size = min(len(newest_events), self.max_size)
+        return newest_events[:size]
+
+    def add_more_events(self, new_events):
+        """Take the new events and add them to the screen, then remove any
+           that are too old.
+        """
+        # Get what's on the screen and remove them from the update queue
+        extant_events = map(lambda spot: spot.event, self.event_box.get_children())
+        new_events = filter(lambda event: event not in extant_events, new_events)
 
         # Remove all the uninteresting events
         blacklist = ['DownloadEvent']
         new_events = filter(lambda event: event[u'type'] not in blacklist, new_events)
 
-        # Don't try to add more events than we have.
-        size = min(len(new_events), self.max_size)
-        for event in reversed(new_events[:size]):
-            # Don't use this as an excuse to pop old events to the top of the
-            # list.
-            if extant_events and event[u'created_at'] < extant_events[0][u'created_at']:
-                continue
+        # Add events to the top, starting from the oldest.
+        for event in reversed(new_events):
             spot_box = EventWidget()
             try:
                 spot_box.populate(event)
-                self.event_box.pack_end(spot_box, True, False, 2)
+                self.event_box.pack_end(spot_box, False, False, 2)
             except:
                 pass
+
+        # Reduce the list back down to [max_size]
+        if len(new_events) + len(extant_events) > self.max_size:
+            for event_widget in self.event_box.get_children()[self.max_size:]:
+                self.event_box.remove(event_widget)
+
         self.event_box.show_all()
 
-        print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
-        return True
+    def add_hilights(self):
+        top_user, top_repo = data.top_contributions()
+        self.hilights.foreach(lambda widget: self.hilights.remove(widget), None)
+
+        # Top user box
+        user = Hilight()
+        user.build_user(top_user)
+        self.hilights.pack_start(user, True, False, 0)
+
+        # Top project box
+        repo = Hilight()
+        repo.build_repo(top_repo)
+        self.hilights.pack_start(repo, True, False, 0)
 
 
 class EventWidget(Gtk.EventBox):
