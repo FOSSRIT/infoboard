@@ -27,6 +27,7 @@ class InfoWin(Gtk.Window):
         super(InfoWin, self).__init__()
         self.max_size = 20
         self.set_default_size(600, 800)
+        self.org = g.get_organization(ORG)
 
         scrolls = Gtk.ScrolledWindow()
         super_box = Gtk.Box(homogeneous=True)
