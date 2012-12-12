@@ -60,6 +60,7 @@ def repo_info(repo):
         entity = Entity(repo_name)
         entity[u'name'] = repo.full_name
         entity[u'url'] = repo.html_url
+        entity[u'owner'] = user_info(repo.owner).name
         DBSession.add(entity)
     return Entity.by_name(repo_name)
 
