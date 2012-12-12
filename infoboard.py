@@ -49,13 +49,20 @@ class InfoWin(Gtk.Window):
         org = g.get_organization(ORG)
         try:
             for user in org.get_members():
-                user_events = user.get_events()
-                size = 5 if len(user_events) >= 5 else len(user_events)
-                eventities = map(data.event_info, user_events[:size])
-                new_events.update(eventities)
+                user_events = iter(user.get_events())
+                limit = 5
+                try:
+                    while limit > 0:
+                        event = data.event_info(user_events.next())
+                        if extant_events and event[u'created_at'] < extant_events[0][u'created_at']:
+                            break
+                        new_events.add(event)
+                        limit -= 1
+                except StopIteration:
+                    # We ran out of items to add. Oh well.
+                    pass
         except:
-            # Something went wrong with Github...
-            pass
+            print("Something went wrong updating the events.")
 
         # Remove any events already onscreen
         new_events.difference_update(set(extant_events))
