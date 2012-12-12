@@ -218,7 +218,7 @@ class EventWidget(Gtk.EventBox):
         elif event[u'type'] == "PushEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C9FFC1"))
             event_text.append("{0} pushed {1} commit(s) to {2}."
-                .format(user_name, len(event[u'payload']['commits']),
+                .format(user_name, event[u'payload']['size'],
                         repo_link))
             for commit in event[u'payload']['commits']:
                 event_text.append(commit['message'])
