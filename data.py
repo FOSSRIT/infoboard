@@ -21,10 +21,17 @@ def top_contributions():
     repo_activity = defaultdict(lambda: defaultdict(int))
     for event in week_activity:
         user_activity[event['actor']]['count'] += 1
-        user_activity[event['actor']][event['type']] += 1
+        if event['type'] == 'PushEvent':
+            user_activity[event['actor']]['commits'] += event['payload']['size']
+        else:
+            user_activity[event['actor']][event['type']] += 1
         if len(event['repo'].split('/')) == 1:
-            repo_activity[event['repo']]['count'] += 1
-            repo_activity[event['repo']][event['actor']] += 1
+            if event['type'] == 'PushEvent':
+                changes = event['payload']['size']
+            else:
+                changes = 1
+            repo_activity[event['repo']]['count'] += changes
+            repo_activity[event['repo']][event['actor']] += changes
     return user_activity, repo_activity
 
 
