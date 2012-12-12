@@ -1,0 +1,6 @@
+This is a simple GTK3 application for watching the activity of members of a
+Github organization.
+
+In order to use this, add a valid Github username/password to the settings.cfg
+file, and optionally change the number of widgets displayed on the screen at
+once.

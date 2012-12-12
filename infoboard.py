@@ -9,8 +9,6 @@ from urllib import urlretrieve
 from gi.repository import Gtk, GdkPixbuf, Gdk, GObject
 from github import Github
 
-ORG = 'FOSSRIT'
-
 # Setup caching
 base_dir = os.path.split(__file__)[0]
 from sqlalchemy import create_engine
@@ -19,15 +17,27 @@ engine = create_engine('sqlite://{0}/knowledge.db'.format(base_dir))
 init_model(engine)
 metadata.create_all(engine)
 
+import config
 import data
 
 
 class InfoWin(Gtk.Window):
-    def __init__(self):
+    def __init__(self, settings):
         super(InfoWin, self).__init__()
-        self.max_size = 20
-        self.set_default_size(600, 800)
-        self.org = g.get_organization(ORG)
+        self.set_default_size(800, 800)
+        try:
+            self.org = g.get_organization(settings['organization'])
+            self.max_size = int(settings['events'])
+            self.max_repos = int(settings['repositories'])
+            self.max_users = int(settings['users'])
+        except KeyError:
+            print("Something is wrong with your configuration file.")
+            print("Using defaults...")
+            self.org = g.get_organization("FOSSRIT")
+            self.max_size = 20
+            self.max_repos = 3
+            self.max_users = 3
+
 
         scrolls = Gtk.ScrolledWindow()
         super_box = Gtk.Box(homogeneous=True)
@@ -116,7 +126,7 @@ class InfoWin(Gtk.Window):
         sorted_users = sorted(top_users,
                               key=lambda user: top_users[user]['count'],
                               reverse=True)
-        for index in range(3):
+        for index in range(self.max_users):
             if len(top_users) > index:
                 # Top user box
                 user_id = sorted_users[index]
@@ -127,7 +137,7 @@ class InfoWin(Gtk.Window):
         sorted_repos = sorted(top_repos,
                               key=lambda repo: top_repos[repo]['count'],
                               reverse=True)
-        for index in range(3):
+        for index in range(self.max_repos):
             if len(top_repos) > index:
                 # Top project box
                 repo_id = sorted_repos[index]
@@ -312,8 +322,9 @@ def mk_label(text):
 
 
 if __name__ == "__main__":
-    g = Github()
-    win = InfoWin()
+    conf = config.get_config()
+    g = Github(conf['login']['user'], conf['login']['password'])
+    win = InfoWin(conf['watch'])
     win.connect("delete-event", Gtk.main_quit)
     win.show_all()
 
