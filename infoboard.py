@@ -108,17 +108,24 @@ class InfoWin(Gtk.Window):
         self.event_box.show_all()
 
     def add_hilights(self):
-        top_user, top_repo = data.top_contributions()
-        self.hilights.foreach(lambda widget: self.hilights.remove(widget), None)
+        top_users, top_repos = data.top_contributions()
+        self.hilights.foreach(lambda widget, _: self.hilights.remove(widget), None)
 
-        # Top user box
-        user = Hilight()
-        user.build_user(top_user)
-        self.hilights.pack_start(user, True, False, 0)
+
+        sorted_users = sorted(top_users,
+                              key=lambda user: top_users[user]['count'],
+                              reverse=True)
+        for index in range(4):
+            if len(top_users) > index:
+                # Top user box
+                user_id = sorted_users[index]
+                user = Hilight()
+                user.build_user(user_id, top_users[user_id])
+                self.hilights.pack_start(user, True, False, 0)
 
         # Top project box
         repo = Hilight()
-        repo.build_repo(top_repo)
+        repo.build_repo(top_repos)
         self.hilights.pack_start(repo, True, False, 0)
 
 
@@ -243,19 +250,13 @@ class Hilight(Gtk.EventBox):
     def __init__(self):
         super(Hilight, self).__init__()
 
-    def build_user(self, user_stats):
-        top_user = sorted(user_stats,
-                          key=lambda user: user_stats[user]['count'],
-                          reverse=True)
-        top_user = None if len(top_user) == 0 else top_user[0]
-        if not top_user:
-            return
-        user = Entity.by_name(top_user)
+    def build_user(self, user_id, user_info):
+        user = Entity.by_name(user_id)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.add(url_to_image(user['avatar'], user['gravatar']))
         text = ["{0} has been very busy this week!".format(user['name'])]
-        for event_type, count in user_stats[top_user].items():
+        for event_type, count in user_info.items():
             if event_type == 'count':
                 continue
             text.append("{0} made {1} {2} this week."
