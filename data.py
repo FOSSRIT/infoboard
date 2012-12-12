@@ -9,10 +9,13 @@ from datetime import datetime, timedelta
 from knowledge.model import DBSession, Entity
 
 
-def recent_events(days=1):
+def recent_events(days=1, limit=0):
     all_events = DBSession.query(Entity).filter(Entity.name.like('event%')).all()
     yesterday = datetime.now() - timedelta(days=days)
-    return filter(lambda event: event[u'created_at'] > yesterday, all_events)
+    events = filter(lambda event: event[u'created_at'] > yesterday, all_events)
+    if len(events) > limit > 0:
+        events = events[:limit]
+    return events
 
 
 def top_contributions():
