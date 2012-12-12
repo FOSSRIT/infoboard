@@ -47,12 +47,15 @@ class InfoWin(Gtk.Window):
         else:
             new_events = set()
         org = g.get_organization(ORG)
-        for user in org.get_members():
-            try:
-                eventities = map(data.event_info, user.get_events()[:5])
-            except IndexError:
-                eventities = map(data.event_info, user.get_events())
-            new_events.update(eventities)
+        try:
+            for user in org.get_members():
+                user_events = user.get_events()
+                size = 5 if len(user_events) >= 5 else len(user_events)
+                eventities = map(data.event_info, user_events[:size])
+                new_events.update(eventities)
+        except:
+            # Something went wrong with Github...
+            pass
 
         # Remove any events already onscreen
         new_events.difference_update(set(extant_events))
