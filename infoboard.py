@@ -35,6 +35,31 @@ class InfoWin(Gtk.Window):
         self.event_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         super_box.add(self.event_box)
 
+        # Container for hilights... vertically down the right
+        hilights = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
+                           homogeneous=True)
+        top_user, top_repo = data.top_contributions()
+
+        # Top user box
+        if top_user:
+            user = Hilight()
+            try:
+                user.build_user(top_user)
+                hilights.pack_start(user, True, False, 0)
+            except:
+                pass
+
+        # Top project box
+        if top_repo:
+            repo = Hilight()
+            try:
+                repo.build_repo(top_repo)
+                hilights.pack_start(repo, True, False, 0)
+            except:
+                pass
+
+        super_box.add(hilights)
+
         scrolls.add_with_viewport(super_box)
         self.add(scrolls)
         self.add_more_events(data.recent_events())
@@ -206,6 +231,57 @@ class EventWidget(Gtk.EventBox):
             event_text.append(event['type'])
         event_label = mk_label('\n'.join(event_text))
         self.box.pack_start(event_label, False, False, 0)
+        self.show_all()
+
+
+class Hilight(Gtk.EventBox):
+    def __init__(self):
+        super(Hilight, self).__init__()
+
+    def build_user(self, user_stats):
+        top_user = sorted(user_stats,
+                          key=lambda user: user_stats[user]['count'],
+                          reverse=True)
+        top_user = None if len(top_user) == 0 else top_user[0]
+        if not top_user:
+            return
+        user = Entity.by_name(top_user)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.add(url_to_image(user['avatar'], user['gravatar']))
+        text = ["{0} has been very busy this week!".format(user['name'])]
+        for event_type, count in user_stats[top_user].items():
+            if event_type == 'count':
+                continue
+            text.append("{0} made {1} {2} this week."
+                .format(user['name'], count, event_type))
+        box.add(mk_label('\n'.join(text)))
+        self.add(box)
+        self.show_all()
+
+    def build_repo(self, repo_stats):
+        top_repo = sorted(repo_stats,
+                          key=lambda repo: repo_stats[repo]['count'],
+                          reverse=True)
+        top_repo = None if len(top_repo) == 0 else top_repo[0]
+        if not top_repo:
+            return
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        repo = Entity.by_name(top_repo)
+        try:
+            owner = Entity.by_name(repo['owner'])
+
+            box.add(url_to_image(owner['avatar'], owner['gravatar']))
+        except:
+            pass
+        text = ["{0} is a cool project!".format(repo['name'])]
+        for user, count in repo_stats[top_repo].items():
+            if user == 'count':
+                continue
+            text.append("{0} made {1} contributions this week."
+                .format(Entity.by_name(user)['name'], count))
+        box.add(mk_label('\n'.join(text)))
+        self.add(box)
         self.show_all()
 
 
