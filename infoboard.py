@@ -116,7 +116,7 @@ class InfoWin(Gtk.Window):
         sorted_users = sorted(top_users,
                               key=lambda user: top_users[user]['count'],
                               reverse=True)
-        for index in range(4):
+        for index in range(3):
             if len(top_users) > index:
                 # Top user box
                 user_id = sorted_users[index]
@@ -124,10 +124,16 @@ class InfoWin(Gtk.Window):
                 user.build_user(user_id, top_users[user_id])
                 self.hilights.pack_start(user, True, False, 0)
 
-        # Top project box
-        repo = Hilight()
-        repo.build_repo(top_repos)
-        self.hilights.pack_start(repo, True, False, 0)
+        sorted_repos = sorted(top_repos,
+                              key=lambda repo: top_repos[repo]['count'],
+                              reverse=True)
+        for index in range(3):
+            if len(top_repos) > index:
+                # Top project box
+                repo_id = sorted_repos[index]
+                repo = Hilight()
+                repo.build_repo(repo_id, top_repos[repo_id])
+                self.hilights.pack_start(repo, True, False, 0)
 
 
 class EventWidget(Gtk.EventBox):
@@ -266,15 +272,10 @@ class Hilight(Gtk.EventBox):
         self.add(box)
         self.show_all()
 
-    def build_repo(self, repo_stats):
-        top_repo = sorted(repo_stats,
-                          key=lambda repo: repo_stats[repo]['count'],
-                          reverse=True)
-        top_repo = None if len(top_repo) == 0 else top_repo[0]
-        if not top_repo:
-            return
+    def build_repo(self, repo_id, repo_info):
+        repo = Entity.by_name(repo_id)
+
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        repo = Entity.by_name(top_repo)
         try:
             owner = Entity.by_name(repo['owner'])
 
@@ -282,7 +283,7 @@ class Hilight(Gtk.EventBox):
         except:
             pass
         text = ["{0} is a cool project!".format(repo['name'])]
-        for user, count in repo_stats[top_repo].items():
+        for user, count in repo_info.items():
             if user == 'count':
                 continue
             text.append("{0} made {1} contributions this week."
