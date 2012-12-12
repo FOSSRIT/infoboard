@@ -103,98 +103,100 @@ class EventWidget(Gtk.EventBox):
 
         self.box.add(url_to_image(user[u'avatar'], user[u'gravatar']))
 
-        event_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        event_text = []
         if event[u'type'] == "CommitCommentEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFDDBD"))
-            event_box.add(mk_label("{0} commented on a commit in {1}."
-                .format(user_name, repo_link)))
+            event_text.append("{0} commented on a commit in {1}."
+                .format(user_name, repo_link))
             comment = Entity.by_name(event[u'comment'])
-            event_box.add(mk_label(comment[u'body']))
+            event_text.append(comment[u'body'])
         elif event[u'type'] == "CreateEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
             new_type = event[u'payload']['ref_type']
             if new_type == 'repository':
-                event_box.add(mk_label("{0} created a new {1}, {2}."
-                    .format(user_name, new_type, repo_link)))
+                event_text.append("{0} created a new {1}, {2}."
+                    .format(user_name, new_type, repo_link))
             else:
-                event_box.add(mk_label("{0} created a new {1} in {2}."
-                    .format(user_name, new_type, repo_link)))
-            event_box.add(mk_label(event[u'payload']['description']))
+                event_text.append("{0} created a new {1} in {2}."
+                    .format(user_name, new_type, repo_link))
+            event_text.append(event[u'payload']['description'])
         elif event[u'type'] == "DeleteEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
             new_type = event[u'payload']['ref_type']
-            event_box.add(mk_label("{0} deleted a {1} in {2}."
-                .format(user_name, new_type, repo_link)))
+            event_text.append("{0} deleted a {1} in {2}."
+                .format(user_name, new_type, repo_link))
         #DownloadEvent
         elif event[u'type'] == "FollowEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFFF80"))
-            event_box.add(mk_label("{0} is now following {1}."
+            event_text.append("{0} is now following {1}."
                 .format(user_name,
-                        event['payload']['target']['name'].encode('utf-8'))))
+                        event['payload']['target']['name'].encode('utf-8')))
         elif event[u'type'] == "ForkEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
             try:
-                event_box.add(mk_label("{0} forked {1} to {2}."
+                event_text.append("{0} forked {1} to {2}."
                     .format(user_name, repo_link,
-                            event[u'payload']['forkee']['full_name'])))
+                            event[u'payload']['forkee']['full_name']))
             except KeyError:
-                event_box.add(mk_label("{0} forked {1} to {2}/{3}."
+                event_text.append("{0} forked {1} to {2}/{3}."
                     .format(user_name, repo_link,
                             event[u'payload']['forkee']['owner']['login'],
-                            event[u'payload']['forkee']['name'])))
+                            event[u'payload']['forkee']['name']))
         #ForkApplyEvent
         elif event[u'type'] == "GistEvent":
-            event_box.add(mk_label("{0} {1}d a gist"
-                .format(user_name, event['payload']['action'])))
+            event_text.append("{0} {1}d a gist"
+                .format(user_name, event['payload']['action']))
         #GollumEvent
         elif event[u'type'] == "IssueCommentEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFDDBD"))
             issue = Entity.by_name(event['issue'])
-            event_box.add(mk_label("{0} commented on issue #{1} in {2}."
-                .format(user_name, issue['number'], repo_link)))
+            event_text.append("{0} commented on issue #{1} in {2}."
+                .format(user_name, issue['number'], repo_link))
             comment = Entity.by_name(event[u'comment'])
-            event_box.add(mk_label(issue[u'title']))
-            event_box.add(mk_label(comment[u'body']))
+            event_text.append(issue[u'title'])
+            event_text.append(comment[u'body'])
         elif event[u'type'] == "IssuesEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
             issue = Entity.by_name(event['issue'])
-            event_box.add(mk_label("{0} {1} issue #{2} in {3}."
+            event_text.append("{0} {1} issue #{2} in {3}."
                 .format(user_name, event['payload']['action'],
-                        issue['number'], repo_link)))
-            event_box.add(mk_label(issue[u'title']))
+                        issue['number'], repo_link))
+            event_text.append(issue[u'title'])
         elif event[u'type'] == "MemberEvent":
             #self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#??????"))
             try:
-                event_box.add(mk_label("{0} added {1} as a collaborator to {2}."
+                event_text.append("{0} added {1} as a collaborator to {2}."
                     .format(user_name, event['payload']['member']['name'],
-                            repo_link)))
+                            repo_link))
             except KeyError:
-                event_box.add(mk_label("{0} added {1} as a collaborator to {2}."
+                event_text.append("{0} added {1} as a collaborator to {2}."
                     .format(user_name, event['payload']['member']['login'],
-                            repo_link)))
+                            repo_link))
         #PublicEvent
         elif event[u'type'] == "PullRequestEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
             # request = Entity.by_name(event['request'])
-            event_box.add(mk_label("{0} {1} pull request #{2} in {3}."
+            event_text.append("{0} {1} pull request #{2} in {3}."
                 .format(user_name, event['payload']['action'],
-                        event['payload']['number'], repo_link)))
+                        event['payload']['number'], repo_link))
         #PullRequestReviewCommentEvent
         elif event[u'type'] == "PushEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C9FFC1"))
-            event_box.add(mk_label("{0} pushed {1} commit(s) to {2}."
+            event_text.append("{0} pushed {1} commit(s) to {2}."
                 .format(user_name, len(event[u'payload']['commits']),
-                        repo_link)))
+                        repo_link))
             for commit in event[u'payload']['commits']:
-                event_box.add(mk_label(commit['message']))
+                event_text.append(commit['message'])
         #TeamAddEvent
         elif event[u'type'] == "WatchEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFFF80"))
-            event_box.add(mk_label("{0} is now watching {1}"
-                .format(user_name, repo_link)))
+            event_text.append("{0} is now watching {1}"
+                .format(user_name, repo_link))
         else:
-            event_box.add(mk_label(event['type']))
-        self.box.pack_end(event_box, False, False, 0)
+            event_text.append(event['type'])
+        event_label = mk_label('\n'.join(event_text))
+        self.box.pack_end(event_label, False, False, 0)
+        self.show_all()
 
 
 def url_to_image(url, filename):
