@@ -118,14 +118,16 @@ class EventWidget(Gtk.EventBox):
                 event_text.append("{0} created a new {1}, {2}."
                     .format(user_name, new_type, repo_link))
             else:
-                event_text.append("{0} created a new {1} in {2}."
-                    .format(user_name, new_type, repo_link))
+                event_text.append("{0} created {1} {3} in {2}."
+                    .format(user_name, new_type, repo_link,
+                            event[u'payload']['ref']))
             event_text.append(event[u'payload']['description'])
         elif event[u'type'] == "DeleteEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
             new_type = event[u'payload']['ref_type']
-            event_text.append("{0} deleted a {1} in {2}."
-                .format(user_name, new_type, repo_link))
+            event_text.append("{0} deleted {1} {3} in {2}."
+                .format(user_name, new_type, repo_link,
+                        event[u'payload']['ref']))
         #DownloadEvent
         elif event[u'type'] == "FollowEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFFF80"))
