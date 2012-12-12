@@ -101,7 +101,8 @@ class EventWidget(Gtk.EventBox):
         else:
             repo_link = event[u'repo']
 
-        self.box.add(url_to_image(user[u'avatar'], user[u'gravatar']))
+        self.box.pack_start(url_to_image(user[u'avatar'], user[u'gravatar']),
+                            False, False, 10)
 
         event_text = []
         if event[u'type'] == "CommitCommentEvent":
@@ -195,7 +196,7 @@ class EventWidget(Gtk.EventBox):
         else:
             event_text.append(event['type'])
         event_label = mk_label('\n'.join(event_text))
-        self.box.pack_end(event_label, False, False, 0)
+        self.box.pack_start(event_label, False, False, 0)
         self.show_all()
 
 
