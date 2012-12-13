@@ -162,15 +162,23 @@ class EventWidget(Gtk.EventBox):
         self.box.pack_start(url_to_image(user[u'avatar'], user[u'gravatar']),
                             False, False, 10)
 
+        event_colors = {
+            'commit': "#C9FFC1",
+            'branch': "#C2C9FF",
+            'issue': "#FFBAF9",
+            'comment': "#FFDDBD",
+            'social': "#FFFF80",
+        }
         event_text = []
+        color = "#FFFFFF"
         if event[u'type'] == "CommitCommentEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFDDBD"))
+            color = event_colors['comment']
             event_text.append("{0} commented on a commit in {1}."
                 .format(user_name, repo_link))
             comment = Entity.by_name(event[u'comment'])
             event_text.append(comment[u'body'])
         elif event[u'type'] == "CreateEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
+            color = event_colors['branch']
             new_type = event[u'payload']['ref_type']
             if new_type == 'repository':
                 event_text.append("{0} created a new {1}, {2}."
@@ -181,19 +189,19 @@ class EventWidget(Gtk.EventBox):
                             event[u'payload']['ref']))
             event_text.append(event[u'payload']['description'])
         elif event[u'type'] == "DeleteEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
+            color = event_colors['branch']
             new_type = event[u'payload']['ref_type']
             event_text.append("{0} deleted {1} {3} in {2}."
                 .format(user_name, new_type, repo_link,
                         event[u'payload']['ref']))
         #DownloadEvent
         elif event[u'type'] == "FollowEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFFF80"))
+            color = event_colors['social']
             event_text.append("{0} is now following {1}."
                 .format(user_name,
                         event['payload']['target']['name'].encode('utf-8')))
         elif event[u'type'] == "ForkEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C2C9FF"))
+            color = event_colors['branch']
             try:
                 event_text.append("{0} forked {1} to {2}."
                     .format(user_name, repo_link,
@@ -209,7 +217,7 @@ class EventWidget(Gtk.EventBox):
                 .format(user_name, event['payload']['action']))
         #GollumEvent
         elif event[u'type'] == "IssueCommentEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFDDBD"))
+            color = event_colors['comment']
             issue = Entity.by_name(event['issue'])
             event_text.append("{0} commented on issue #{1} in {2}."
                 .format(user_name, issue['number'], repo_link))
@@ -217,14 +225,13 @@ class EventWidget(Gtk.EventBox):
             event_text.append(issue[u'title'])
             event_text.append(comment[u'body'])
         elif event[u'type'] == "IssuesEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
+            color = event_colors['issue']
             issue = Entity.by_name(event['issue'])
             event_text.append("{0} {1} issue #{2} in {3}."
                 .format(user_name, event['payload']['action'],
                         issue['number'], repo_link))
             event_text.append(issue[u'title'])
         elif event[u'type'] == "MemberEvent":
-            #self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#??????"))
             try:
                 event_text.append("{0} added {1} as a collaborator to {2}."
                     .format(user_name, event['payload']['member']['name'],
@@ -237,14 +244,14 @@ class EventWidget(Gtk.EventBox):
             event_text.append("{0} made {1} public."
                               .format(user_name, repo_link))
         elif event[u'type'] == "PullRequestEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
+            color = event_colors['issue']
             # request = Entity.by_name(event['request'])
             event_text.append("{0} {1} pull request #{2} in {3}."
                 .format(user_name, event['payload']['action'],
                         event['payload']['number'], repo_link))
         #PullRequestReviewCommentEvent
         elif event[u'type'] == "PushEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#C9FFC1"))
+            color = event_colors['commit']
             event_text.append("{0} pushed {1} commit(s) to {2}."
                 .format(user_name, event[u'payload']['size'],
                         repo_link))
@@ -252,11 +259,13 @@ class EventWidget(Gtk.EventBox):
                 event_text.append(commit['message'])
         #TeamAddEvent
         elif event[u'type'] == "WatchEvent":
-            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFFF80"))
+            color = event_colors['social']
             event_text.append("{0} is now watching {1}"
                 .format(user_name, repo_link))
         else:
             event_text.append(event['type'])
+
+        self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(color))
         event_label = mk_label('\n'.join(event_text))
         self.box.pack_start(event_label, False, False, 0)
         self.show_all()
