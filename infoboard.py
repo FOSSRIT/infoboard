@@ -233,7 +233,9 @@ class EventWidget(Gtk.EventBox):
                 event_text.append("{0} added {1} as a collaborator to {2}."
                     .format(user_name, event['payload']['member']['login'],
                             repo_link))
-        #PublicEvent
+        elif event[u'type'] == "PublicEvent":
+            event_text.append("{0} made {1} public."
+                              .format(user_name, repo_link))
         elif event[u'type'] == "PullRequestEvent":
             self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#FFBAF9"))
             # request = Entity.by_name(event['request'])
