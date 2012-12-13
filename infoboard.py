@@ -105,11 +105,8 @@ class InfoWin(Gtk.Window):
         # Add events to the top, starting from the oldest.
         for event in reversed(new_events):
             spot_box = EventWidget()
-            try:
-                spot_box.populate(event)
-                self.event_box.pack_end(spot_box, False, False, 2)
-            except:
-                pass
+            spot_box.populate(event)
+            self.event_box.pack_end(spot_box, False, False, 2)
 
         # Reduce the list back down to [max_size]
         if len(new_events) + len(extant_events) > self.max_size:
