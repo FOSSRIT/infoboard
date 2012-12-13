@@ -263,43 +263,42 @@ class EventWidget(Gtk.EventBox):
 class Hilight(Gtk.EventBox):
     def __init__(self):
         super(Hilight, self).__init__()
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
     def build_user(self, user_id, user_info):
         user = Entity.by_name(user_id)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        box.add(url_to_image(user['avatar'], user['gravatar']))
         text = ["{0} has been very busy this week!".format(user['name'])]
         for event_type, count in user_info.items():
             if event_type == 'count':
                 continue
             text.append("{0} made {1} {2} this week."
                 .format(user['name'], count, event_type))
-        box.add(mk_label('\n'.join(text)))
-        self.add(box)
-        self.show_all()
+
+        self.finish(user, text)
 
     def build_repo(self, repo_id, repo_info):
         repo = Entity.by_name(repo_id)
+        owner = Entity.by_name(repo['owner'])
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        try:
-            owner = Entity.by_name(repo['owner'])
-
-            box.add(url_to_image(owner['avatar'], owner['gravatar']))
-        except:
-            pass
         text = ["{0} is a cool project!".format(repo['name'])]
         for user, count in repo_info.items():
             if user == 'count':
                 continue
             text.append("{0} made {1} contributions this week."
                 .format(Entity.by_name(user)['name'], count))
-        box.add(mk_label('\n'.join(text)))
-        self.add(box)
+
+        self.finish(owner, text)
+
+    def finish(self, user, text):
+        if user:
+            self.box.add(url_to_image(user['avatar'], user['gravatar']))
+        self.box.add(mk_label('\n'.join(text)))
+        self.add(self.box)
         self.show_all()
 
 
+# Convenience functions to make Gtk Widgets
 def url_to_image(url, filename):
     local_path = os.path.join(base_dir, "image_cache", filename)
     if not os.path.exists(local_path):
