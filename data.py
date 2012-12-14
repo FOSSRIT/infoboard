@@ -87,6 +87,7 @@ def repo_info(repo):
         print("Caching new repository {0}".format(repo_name))
         entity = Entity(repo_name)
         entity[u'name'] = repo.full_name
+        entity[u'description'] = repo.description
         entity[u'url'] = repo.html_url
         entity[u'owner'] = user_info(repo.owner).name
         DBSession.add(entity)

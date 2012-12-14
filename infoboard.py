@@ -156,8 +156,10 @@ class EventWidget(Gtk.EventBox):
         repo = Entity.by_name(event[u'repo'])
         if repo:
             repo_link = '<a href="{0}">{1}</a>'.format(repo['url'], repo['name'])
+            repo_desc = repo['description']
         else:
             repo_link = event[u'repo']
+            repo_desc = ''
 
         self.box.pack_start(url_to_image(user[u'avatar'], user[u'gravatar']),
                             False, False, 10)
@@ -187,7 +189,7 @@ class EventWidget(Gtk.EventBox):
                 event_text.append("{0} created {1} {3} in {2}."
                     .format(user_name, new_type, repo_link,
                             event[u'payload']['ref']))
-            event_text.append(event[u'payload']['description'])
+            event_text.append(repo_desc)
         elif event[u'type'] == "DeleteEvent":
             color = event_colors['branch']
             new_type = event[u'payload']['ref_type']
@@ -211,6 +213,7 @@ class EventWidget(Gtk.EventBox):
                     .format(user_name, repo_link,
                             event[u'payload']['forkee']['owner']['login'],
                             event[u'payload']['forkee']['name']))
+            event_text.append(repo_desc)
         #ForkApplyEvent
         elif event[u'type'] == "GistEvent":
             event_text.append("{0} {1}d a gist"
@@ -240,9 +243,11 @@ class EventWidget(Gtk.EventBox):
                 event_text.append("{0} added {1} as a collaborator to {2}."
                     .format(user_name, event['payload']['member']['login'],
                             repo_link))
+            event_text.append(repo_desc)
         elif event[u'type'] == "PublicEvent":
             event_text.append("{0} made {1} public."
                               .format(user_name, repo_link))
+            event_text.append(repo_desc)
         elif event[u'type'] == "PullRequestEvent":
             color = event_colors['issue']
             # request = Entity.by_name(event['request'])
@@ -262,6 +267,7 @@ class EventWidget(Gtk.EventBox):
             color = event_colors['social']
             event_text.append("{0} is now watching {1}"
                 .format(user_name, repo_link))
+            event_text.append(repo_desc)
         else:
             event_text.append(event['type'])
 
