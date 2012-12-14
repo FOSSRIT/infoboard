@@ -32,7 +32,7 @@ def top_contributions():
         user_activity[event['actor']]['count'] += changes
         user_activity[event['actor']][key] += changes
 
-        if len(event['repo'].split('/')) == 1:
+        if Entity.by_name(event['repo']):
             if event['type'] == 'PushEvent':
                 changes = event['payload']['size']
             else:
