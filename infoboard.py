@@ -218,7 +218,12 @@ class EventWidget(Gtk.EventBox):
         elif event[u'type'] == "GistEvent":
             event_text.append("{0} {1}d a gist"
                 .format(user_name, event['payload']['action']))
-        #GollumEvent
+        elif event[u'type'] == "GollumEvent":
+            event_text.append("{0} updated {2} wiki pages in {1}."
+                              .format(user_name, repo_link,
+                                      len(event['payload']['pages'])))
+            for page in event['payload']['pages']:
+                event_text.append(page['title'])
         elif event[u'type'] == "IssueCommentEvent":
             color = event_colors['comment']
             issue = Entity.by_name(event['issue'])
