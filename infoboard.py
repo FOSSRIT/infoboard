@@ -76,7 +76,7 @@ class InfoWin(Gtk.Window):
                 try:
                     while limit > 0:
                         event = data.event_info(user_events.next())
-                        if len(newest_events) > 0 and event[u'created_at'] < newest_events[0][u'created_at']:
+                        if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
                             break
                         newest_events.append(event)
                         limit -= 1
