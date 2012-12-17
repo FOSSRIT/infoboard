@@ -186,14 +186,14 @@ class EventWidget(Gtk.EventBox):
                 event_text.append("{0} created a new {1}, {2}."
                     .format(user_name, new_type, repo_link))
             else:
-                event_text.append("{0} created {1} {3} in {2}."
+                event_text.append("{0} created {1} <tt>{3}</tt> in {2}."
                     .format(user_name, new_type, repo_link,
                             event[u'payload']['ref']))
             event_text.append(repo_desc)
         elif event[u'type'] == "DeleteEvent":
             color = event_colors['branch']
             new_type = event[u'payload']['ref_type']
-            event_text.append("{0} deleted {1} {3} in {2}."
+            event_text.append("{0} deleted {1} <tt>{3}</tt> in {2}."
                 .format(user_name, new_type, repo_link,
                         event[u'payload']['ref']))
         #DownloadEvent
