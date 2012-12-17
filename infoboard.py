@@ -72,7 +72,7 @@ class InfoWin(Gtk.Window):
         try:
             for user in self.org.get_members():
                 user_events = iter(user.get_events())
-                limit = 5
+                limit = self.max_size
                 try:
                     while limit > 0:
                         event = data.event_info(user_events.next())
