@@ -9,10 +9,11 @@ from datetime import datetime, timedelta
 from knowledge.model import DBSession, Entity
 
 
-def recent_events(days=1, limit=0):
-    all_events = DBSession.query(Entity).filter(Entity.name.like('event%')).all()
-    yesterday = datetime.now() - timedelta(days=days)
-    events = filter(lambda event: event['created_at'] > yesterday, all_events)
+def recent_events(days=0, limit=0):
+    events = DBSession.query(Entity).filter(Entity.name.like('event%')).all()
+    if days > 0:
+        yesterday = datetime.now() - timedelta(days=days)
+        events = filter(lambda event: event['created_at'] > yesterday, events)
     events.sort(key=lambda event: event['created_at'], reverse=True)
     if len(events) > limit > 0:
         events = events[:limit]
