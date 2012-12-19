@@ -91,7 +91,7 @@ def repo_info(repo):
         entity[u'name'] = repo.full_name
         # Evidently you cannot set facts to None. (?)
         if not repo.description:
-            entity[u'description'] = ''
+            entity[u'description'] = u''
         else:
             entity[u'description'] = repo.description
         entity[u'url'] = repo.html_url
