@@ -3,6 +3,7 @@
 """InfoBoard is a Python/GTK3 app for displaying live info about developers"""
 
 import os
+import re
 
 from urllib import urlretrieve
 
@@ -336,6 +337,7 @@ def url_to_image(url, filename):
 
 
 def mk_label(text):
+    text = re.sub('<img', '&lt;img', text)
     label = Gtk.Label()
     label.set_markup(text)
     label.set_line_wrap(True)
