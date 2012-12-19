@@ -293,6 +293,7 @@ class Hilight(Gtk.EventBox):
     def __init__(self, scale):
         super(Hilight, self).__init__()
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.add(self.box)
         self.scale = scale
 
     def build_user(self, user_id, user_info):
@@ -324,7 +325,6 @@ class Hilight(Gtk.EventBox):
         if user:
             self.box.add(url_to_image(user['avatar'], user['gravatar'], self.scale))
         self.box.add(mk_label('\n'.join(text)))
-        self.add(self.box)
         self.show_all()
 
 
