@@ -72,8 +72,9 @@ def user_info(user):
     if not Entity.by_name(user_name):
         print("Caching new user {0}".format(user_name))
         entity = Entity(user_name)
-        entity[u'avatar'] = user.avatar_url
         entity[u'gravatar'] = user.gravatar_id
+        entity['avatar'] = u'http://www.gravatar.com/avatar/{0}?s=200' \
+                             .format(user.gravatar_id)
         # Not everyone has set a name for their account.
         if user.name:
             entity[u'name'] = user.name
