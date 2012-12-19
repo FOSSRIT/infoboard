@@ -69,8 +69,11 @@ class InfoWin(Gtk.Window):
            events.
         """
         newest_events = data.recent_events(limit=self.max_size)
+        self.members = self.org.get_members()
+        newest_events = filter(lambda event: event['actor'] in self.members,
+                               newest_events)
         try:
-            for user in self.org.get_members():
+            for user in self.members:
                 user_events = iter(user.get_events())
                 limit = self.max_size
                 try:
