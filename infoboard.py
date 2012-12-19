@@ -31,6 +31,7 @@ class InfoWin(Gtk.Window):
             self.max_size = int(settings['events'])
             self.max_repos = int(settings['repositories'])
             self.max_users = int(settings['users'])
+            self.scale = float(settings['scale'])
         except KeyError:
             print("Something is wrong with your configuration file.")
             print("Using defaults...")
@@ -38,6 +39,7 @@ class InfoWin(Gtk.Window):
             self.max_size = 20
             self.max_repos = 3
             self.max_users = 3
+            self.scale = .8
 
 
         scrolls = Gtk.ScrolledWindow()
@@ -108,7 +110,7 @@ class InfoWin(Gtk.Window):
 
         # Add events to the top, starting from the oldest.
         for event in reversed(new_events):
-            spot_box = EventWidget()
+            spot_box = EventWidget(self.scale)
             spot_box.populate(event)
             self.event_box.pack_end(spot_box, False, False, 2)
 
@@ -131,7 +133,7 @@ class InfoWin(Gtk.Window):
             if len(top_users) > index:
                 # Top user box
                 user_id = sorted_users[index]
-                user = Hilight()
+                user = Hilight(2*self.scale)
                 user.build_user(user_id, top_users[user_id])
                 self.hilights.pack_start(user, True, False, 0)
 
@@ -142,16 +144,17 @@ class InfoWin(Gtk.Window):
             if len(top_repos) > index:
                 # Top project box
                 repo_id = sorted_repos[index]
-                repo = Hilight()
+                repo = Hilight(2*self.scale)
                 repo.build_repo(repo_id, top_repos[repo_id])
                 self.hilights.pack_start(repo, True, False, 0)
 
 
 class EventWidget(Gtk.EventBox):
-    def __init__(self):
+    def __init__(self, scale):
         super(EventWidget, self).__init__()
         self.box = Gtk.Box()
         self.add(self.box)
+        self.scale = scale
 
     def populate(self, event):
         self.event = event
@@ -165,7 +168,7 @@ class EventWidget(Gtk.EventBox):
             repo_link = event[u'repo']
             repo_desc = ''
 
-        self.box.pack_start(url_to_image(user[u'avatar'], user[u'gravatar']),
+        self.box.pack_start(url_to_image(user[u'avatar'], user[u'gravatar'], self.scale),
                             False, False, 10)
 
         event_colors = {
@@ -287,9 +290,10 @@ class EventWidget(Gtk.EventBox):
 
 
 class Hilight(Gtk.EventBox):
-    def __init__(self):
+    def __init__(self, scale):
         super(Hilight, self).__init__()
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.scale = scale
 
     def build_user(self, user_id, user_info):
         user = Entity.by_name(user_id)
@@ -318,20 +322,21 @@ class Hilight(Gtk.EventBox):
 
     def finish(self, user, text):
         if user:
-            self.box.add(url_to_image(user['avatar'], user['gravatar']))
+            self.box.add(url_to_image(user['avatar'], user['gravatar'], self.scale))
         self.box.add(mk_label('\n'.join(text)))
         self.add(self.box)
         self.show_all()
 
 
 # Convenience functions to make Gtk Widgets
-def url_to_image(url, filename):
+def url_to_image(url, filename, scale=1):
     local_path = os.path.join(base_dir, "image_cache", filename)
     if not os.path.exists(local_path):
         urlretrieve(url, local_path)
     # Resize files to 80px x 80px
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(local_path)
-    pixbuf = pixbuf.scale_simple(80, 80, GdkPixbuf.InterpType.BILINEAR)
+    size = scale * 100
+    pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
     img = Gtk.Image.new_from_pixbuf(pixbuf)
     return img
 
