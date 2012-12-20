@@ -1,8 +1,5 @@
-[login]
 user:
 password:
-
-[watch]
 organization: FOSSRIT
 events: 8
 users: 1
