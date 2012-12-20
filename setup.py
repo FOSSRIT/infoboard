@@ -10,5 +10,8 @@ setup(
     author_email='Qalthos@gmail.com',
     url='https://github.com/FOSSRIT/infoboard',
     packages=find_packages(),
-    install_requires=['pygithub', 'knowledge']
+    install_requires=['pygithub',
+                      'knowledge',
+                      'pyyaml',
+                     ]
 )

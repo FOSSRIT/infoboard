@@ -18,7 +18,7 @@ engine = create_engine('sqlite://{0}/knowledge.db'.format(base_dir))
 init_model(engine)
 metadata.create_all(engine)
 
-import config
+import yaml
 import data
 
 
@@ -350,9 +350,11 @@ def mk_label(text):
 
 
 if __name__ == "__main__":
-    conf = config.get_config()
-    g = Github(conf['login']['user'], conf['login']['password'])
-    win = InfoWin(conf['watch'])
+    yaml_location = os.path.join(os.path.split(__file__)[0], 'settings.yaml')
+    with open(yaml_location) as yaml_file:
+        conf = yaml.load(yaml_file)
+    g = Github(conf['user'], conf['password'])
+    win = InfoWin(conf)
     win.connect("delete-event", Gtk.main_quit)
     win.show_all()
 
