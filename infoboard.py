@@ -206,9 +206,13 @@ class EventWidget(Gtk.EventBox):
         #DownloadEvent
         elif event[u'type'] == "FollowEvent":
             color = event_colors['social']
-            event_text.append("{0} is now following {1}."
-                .format(user_name,
-                        event['payload']['target']['name'].encode('utf-8')))
+            target = event['payload']['target']
+            try:
+                event_text.append("{0} is now following {1}."
+                    .format(user_name, target['name'].encode('utf-8')))
+            except KeyError:
+                event_text.append("{0} is now following {1}."
+                    .format(user_name, target['login'].encode('utf-8')))
         elif event[u'type'] == "ForkEvent":
             color = event_colors['branch']
             try:
