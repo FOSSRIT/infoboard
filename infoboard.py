@@ -72,25 +72,32 @@ class InfoWin(Gtk.Window):
            events.
         """
         newest_events = data.recent_events(limit=self.max_size)
-        self.members = self.org.get_members()
-        newest_events = filter(lambda event: event['actor'] in self.members,
-                               newest_events)
+
         try:
-            for user in self.members:
-                user_events = iter(user.get_events())
-                limit = self.max_size
-                try:
-                    while limit > 0:
-                        event = data.event_info(user_events.next())
-                        if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
-                            break
-                        newest_events.append(event)
-                        limit -= 1
-                except StopIteration:
-                    # We ran out of items to add. Oh well.
-                    pass
+            members = self.org.get_members()
+            newest_events = filter(lambda event: event['actor'] in members,
+                                   newest_events)
         except:
-            print("Something went wrong updating the events.")
+            print('Error getting members')
+
+        for user in members:
+            try:
+                user_events = iter(user.get_events())
+            except:
+                print("Something went wrong updating the events.")
+                continue
+
+            limit = self.max_size
+            try:
+                while limit > 0:
+                    event = data.event_info(user_events.next())
+                    if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
+                        break
+                    newest_events.append(event)
+                    limit -= 1
+            except StopIteration:
+                # We ran out of items to add. Oh well.
+                pass
 
         newest_events.sort(key=lambda event: event[u'created_at'], reverse=True)
         size = min(len(newest_events), self.max_size)
