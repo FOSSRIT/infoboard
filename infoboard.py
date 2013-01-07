@@ -41,7 +41,6 @@ class InfoWin(Gtk.Window):
             self.max_users = 3
             self.scale = .8
 
-
         scrolls = Gtk.ScrolledWindow()
         super_box = Gtk.Box(homogeneous=True)
 
