@@ -28,6 +28,11 @@ def top_contributions():
         if event['type'] == 'PushEvent':
             changes = event['payload']['size']
             key = 'commits'
+        elif event['type'] in ['CommitCommentEvent', 'FollowEvent',
+                               'IssueCommentEvent', 'WatchEvent']:
+            # Social (non-coding) events carry less weight
+            changes = .1
+            key = 'social actions'
         else:
             changes = 1
             key = event['type']

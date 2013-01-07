@@ -313,6 +313,8 @@ class Hilight(Gtk.EventBox):
         for event_type, count in user_info.items():
             if event_type == 'count':
                 continue
+            elif event_type == 'social actions':
+                count = int(count * 10)
             text.append("{0} made {1} {2} this week."
                 .format(user['name'], count, event_type))
 
