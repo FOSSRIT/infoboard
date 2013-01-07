@@ -40,9 +40,8 @@ def top_contributions():
         user_activity[event['actor']][key] += changes
 
         if Entity.by_name(event['repo']):
-            if event['type'] == 'PushEvent':
-                changes = event['payload']['size']
-            else:
+            if event['type'] in ['CommitCommentEvent', 'FollowEvent',
+                               'IssueCommentEvent', 'WatchEvent']:
                 changes = 1
             repo_activity[event['repo']]['count'] += changes
             repo_activity[event['repo']][event['actor']] += changes
