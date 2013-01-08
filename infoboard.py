@@ -87,16 +87,17 @@ class InfoWin(Gtk.Window):
                 continue
 
             limit = self.max_size
-            try:
-                while limit > 0:
+            while limit > 0:
+                try:
                     event = data.event_info(user_events.next())
-                    if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
-                        break
-                    newest_events.append(event)
-                    limit -= 1
-            except StopIteration:
-                # We ran out of items to add. Oh well.
-                pass
+                except:
+                    # We either ran out of elements early, or hit a problem
+                    # pinging Github.  Either way, skip to the next user.
+                    pass
+                if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
+                    break
+                newest_events.append(event)
+                limit -= 1
 
         newest_events.sort(key=lambda event: event[u'created_at'], reverse=True)
         size = min(len(newest_events), self.max_size)
