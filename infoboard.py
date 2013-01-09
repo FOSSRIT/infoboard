@@ -78,6 +78,7 @@ class InfoWin(Gtk.Window):
                                    newest_events)
         except:
             print('Error getting members')
+            return newest_events
 
         for user in members:
             try:
@@ -93,7 +94,7 @@ class InfoWin(Gtk.Window):
                 except:
                     # We either ran out of elements early, or hit a problem
                     # pinging Github.  Either way, skip to the next user.
-                    pass
+                    continue
                 if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
                     break
                 newest_events.append(event)
