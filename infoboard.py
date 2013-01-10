@@ -92,6 +92,7 @@ class InfoWin(Gtk.Window):
                 try:
                     event = data.event_info(user_events.next())
                 except:
+                    print("Coouldn't get events for user")
                     # We either ran out of elements early, or hit a problem
                     # pinging Github.  Either way, skip to the next user.
                     continue
