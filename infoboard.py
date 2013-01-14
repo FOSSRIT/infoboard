@@ -32,6 +32,7 @@ class InfoWin(Gtk.Window):
             self.max_repos = int(settings['repositories'])
             self.max_users = int(settings['users'])
             self.scale = float(settings['scale'])
+            self.reload_interval = int(settings['interval'])
         except KeyError:
             print("Something is wrong with your configuration file.")
             print("Using defaults...")
@@ -40,6 +41,7 @@ class InfoWin(Gtk.Window):
             self.max_repos = 3
             self.max_users = 3
             self.scale = .8
+            self.reload_interval = 360000
 
         scrolls = Gtk.ScrolledWindow()
         super_box = Gtk.Box(homogeneous=True)
@@ -56,7 +58,7 @@ class InfoWin(Gtk.Window):
         scrolls.add_with_viewport(super_box)
         self.add(scrolls)
         self.refresh()
-        GObject.timeout_add(360000, self.refresh)
+        GObject.timeout_add(self.reload_interval, self.refresh)
 
     def refresh(self):
         events = self.cache_new_events()
