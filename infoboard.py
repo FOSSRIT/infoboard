@@ -95,7 +95,7 @@ class InfoWin(Gtk.Window):
                     print("Coouldn't get events for user")
                     # We either ran out of elements early, or hit a problem
                     # pinging Github.  Either way, skip to the next user.
-                    continue
+                    break
                 if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
                     break
                 newest_events.append(event)
