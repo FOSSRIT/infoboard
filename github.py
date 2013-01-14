@@ -2,22 +2,26 @@ import requests
 import json
 
 
-def requests_wrapper(url, auth):
-    r = requests.get(url, auth=auth)
-    data = json.loads(r.content)
-    return data
+class Github(object):
+    def __init__(self, auth=None):
+        self.auth = auth
+
+    def requests_wrapper(self, url):
+        r = requests.get(url, auth=self.auth)
+        data = json.loads(r.content)
+        return data
 
 
-def organization_members(org_name, auth):
-    return requests_wrapper('https://api.github.com/orgs/%s/members' % org_name, auth)
+    def organization_members(self, org_name):
+        return self.requests_wrapper('https://api.github.com/orgs/%s/members' % org_name)
 
 
-def user_activity(user_name, auth):
-    return requests_wrapper('https://api.github.com/users/%s/events' % user_name, auth)
+    def user_activity(self, user_name):
+        return self.requests_wrapper('https://api.github.com/users/%s/events' % user_name)
 
 
 if __name__ == "__main__":
-    auth = None
-    users = organization_members('FOSSRIT', auth)
+    g = Github()
+    users = g.organization_members('FOSSRIT')
     print(users[0]['login'])
-    print(user_activity(users[0]['login'], auth))
+    print(g.user_activity(users[0]['login']))
