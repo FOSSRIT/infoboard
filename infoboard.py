@@ -64,6 +64,7 @@ class InfoWin(Gtk.Window):
         self.add_hilights()
 
         print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
+        self.show_all()
         return True
 
     def cache_new_events(self):
@@ -127,8 +128,6 @@ class InfoWin(Gtk.Window):
         if len(new_events) + len(extant_events) > self.max_size:
             for event_widget in self.event_box.get_children()[self.max_size:]:
                 self.event_box.remove(event_widget)
-
-        self.event_box.show_all()
 
     def add_hilights(self):
         top_users, top_repos = data.top_contributions()
@@ -299,7 +298,6 @@ class EventWidget(Gtk.EventBox):
         self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(color))
         event_label = mk_label('\n'.join(event_text))
         self.box.pack_start(event_label, False, False, 0)
-        self.show_all()
 
 
 class Hilight(Gtk.EventBox):
@@ -340,7 +338,6 @@ class Hilight(Gtk.EventBox):
         if user:
             self.box.add(url_to_image(user['avatar'], user['gravatar'], self.scale))
         self.box.add(mk_label('\n'.join(text)))
-        self.show_all()
 
 
 # Convenience functions to make Gtk Widgets
@@ -371,6 +368,5 @@ if __name__ == "__main__":
     g = Github(conf['user'], conf['password'])
     win = InfoWin(conf)
     win.connect("delete-event", Gtk.main_quit)
-    win.show_all()
 
     Gtk.main()
