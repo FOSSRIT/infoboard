@@ -27,7 +27,7 @@ class InfoWin(Gtk.Window):
         super(InfoWin, self).__init__()
         self.set_default_size(800, 800)
         try:
-            self.org = g.get_organization(settings['organization'])
+            self.org = settings['organization']
             self.max_size = int(settings['events'])
             self.max_repos = int(settings['repositories'])
             self.max_users = int(settings['users'])
@@ -36,7 +36,7 @@ class InfoWin(Gtk.Window):
         except KeyError:
             print("Something is wrong with your configuration file.")
             print("Using defaults...")
-            self.org = g.get_organization("FOSSRIT")
+            self.org = "FOSSRIT"
             self.max_size = 20
             self.max_repos = 3
             self.max_users = 3
@@ -76,8 +76,9 @@ class InfoWin(Gtk.Window):
         newest_events = data.recent_events(limit=self.max_size)
 
         try:
-            members = self.org.get_members()
-            newest_events = filter(lambda event: event['actor'] in members,
+            members = g.organization_members(self.org)
+            logins = filter(lambda user: user['name'], members)
+            newest_events = filter(lambda event: event['actor'] in logins,
                                    newest_events)
         except:
             print('Error getting members')
@@ -85,7 +86,7 @@ class InfoWin(Gtk.Window):
 
         for user in members:
             try:
-                user_events = iter(user.get_events())
+                user_events = g.user_activity(user['login'])
             except:
                 print("Something went wrong updating the events.")
                 continue
@@ -367,7 +368,7 @@ if __name__ == "__main__":
     yaml_location = os.path.join(os.path.split(__file__)[0], 'settings.yaml')
     with open(yaml_location) as yaml_file:
         conf = yaml.load(yaml_file)
-    g = Github(conf['user'], conf['password'])
+    g = Github((conf['user'], conf['password']))
     win = InfoWin(conf)
     win.connect("delete-event", Gtk.main_quit)
 
