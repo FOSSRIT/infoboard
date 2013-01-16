@@ -7,17 +7,19 @@ import data
 class Github(object):
     def __init__(self, auth=None):
         self.auth = auth
+        self.rate_limiting = (5000, 5000)
 
     def requests_wrapper(self, url):
         r = requests.get(url, auth=self.auth)
+        self.rate_limiting = (r.headers['x-ratelimit-remaining'],
+                              r.headers['x-ratelimit-limit'])
+
         data = json.loads(r.content)
         return data
-
 
     def organization_members(self, org_name):
         members = self.requests_wrapper('https://api.github.com/orgs/%s/members' % org_name)
         return map(data.user_info, members)
-
 
     def user_activity(self, user_name):
         events = self.requests_wrapper('https://api.github.com/users/%s/events' % user_name)
