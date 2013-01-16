@@ -15,11 +15,14 @@ class Github(object):
 
 
     def organization_members(self, org_name):
-        return self.requests_wrapper('https://api.github.com/orgs/%s/members' % org_name)
+        members = self.requests_wrapper('https://api.github.com/orgs/%s/members' % org_name)
+        return map(data.user_info, members)
 
 
     def user_activity(self, user_name):
-        return self.requests_wrapper('https://api.github.com/users/%s/events' % user_name)
+        events = self.requests_wrapper('https://api.github.com/users/%s/events' % user_name)
+        return map(data.event_info, events)
+
 
 
 if __name__ == "__main__":
