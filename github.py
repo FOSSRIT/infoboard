@@ -1,6 +1,8 @@
 import requests
 import json
 
+import data
+
 
 class Github(object):
     def __init__(self, auth=None):

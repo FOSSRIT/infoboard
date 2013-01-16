@@ -49,23 +49,24 @@ def top_contributions():
 
 
 def event_info(event):
-    event_name = u'event_{0}'.format(event.id)
+    event_name = u'event_{0}'.format(event['id'])
     if not Entity.by_name(event_name):
         print("Caching new event {0}".format(event_name))
         entity = Entity(event_name)
-        entity[u'actor'] = user_info(event.actor).name
+        entity['name'] = event_name
+        entity[u'actor'] = user_info(event['actor']).name
         try:
-            entity[u'repo'] = repo_info(event.repo).name
+            entity[u'repo'] = repo_info(event['repo']).name
         except:
             # I think this means the repo no longer exists.
-            entity[u'repo'] = event.repo.name
-        entity[u'type'] = event.type
-        entity[u'payload'] = event.payload
-        entity[u'created_at'] = event.created_at
-        if event.type in ["CommitCommentEvent", "IssueCommentEvent"]:
-            entity[u'comment'] = comment_info(event.payload['comment']).name
-        if event.type in ["IssueCommentEvent", "IssuesEvent"]:
-            entity['issue'] = issue_info(event.payload['issue']).name
+            entity[u'repo'] = event['repo']['name']
+        entity[u'type'] = event['type']
+        entity[u'payload'] = event['payload']
+        entity[u'created_at'] = event['created_at']
+        if event['type'] in ["CommitCommentEvent", "IssueCommentEvent"]:
+            entity[u'comment'] = comment_info(event['payload']['comment']).name
+        if event['type'] in ["IssueCommentEvent", "IssuesEvent"]:
+            entity['issue'] = issue_info(event['payload']['issue']).name
         DBSession.add(entity)
         DBSession.commit()
         print("Done caching event {0}".format(event_name))
@@ -73,18 +74,19 @@ def event_info(event):
 
 
 def user_info(user):
-    user_name = u'user_{0}'.format(user.id)
+    user_name = u'user_{0}'.format(user['id'])
     if not Entity.by_name(user_name):
         print("Caching new user {0}".format(user_name))
         entity = Entity(user_name)
-        entity[u'gravatar'] = user.gravatar_id
+        entity['login'] = user['login']
+        entity['gravatar'] = user['gravatar_id']
         entity['avatar'] = u'http://www.gravatar.com/avatar/{0}?s=200' \
-                             .format(user.gravatar_id)
+                             .format(user['gravatar_id'])
         # Not everyone has set a name for their account.
-        if user.name:
-            entity[u'name'] = user.name
+        if user.get('name'):
+            entity[u'name'] = user['name']
         else:
-            entity[u'name'] = user.login
+            entity[u'name'] = user['login']
         DBSession.add(entity)
     return Entity.by_name(user_name)
 
