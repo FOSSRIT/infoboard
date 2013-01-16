@@ -62,7 +62,7 @@ def event_info(event):
             entity[u'repo'] = event['repo']['name']
         entity[u'type'] = event['type']
         entity[u'payload'] = event['payload']
-        entity[u'created_at'] = event['created_at']
+        entity[u'created_at'] = datetime.strptime(event['created_at'], '%Y-%m-%dT%H:%M:%SZ')
         if event['type'] in ["CommitCommentEvent", "IssueCommentEvent"]:
             entity[u'comment'] = comment_info(event['payload']['comment']).name
         if event['type'] in ["IssueCommentEvent", "IssuesEvent"]:
