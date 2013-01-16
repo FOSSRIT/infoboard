@@ -92,18 +92,18 @@ def user_info(user):
 
 
 def repo_info(repo):
-    repo_name = u'repo_{0}'.format(repo.id)
+    repo_name = u'repo_{0}'.format(repo['id'])
     if not Entity.by_name(repo_name):
         print("Caching new repository {0}".format(repo_name))
         entity = Entity(repo_name)
-        entity[u'name'] = repo.full_name
+        entity['name'] = repo['full_name']
         # Evidently you cannot set facts to None. (?)
-        if not repo.description:
-            entity[u'description'] = u''
+        if not repo['description']:
+            entity['description'] = u''
         else:
-            entity[u'description'] = repo.description
-        entity[u'url'] = repo.html_url
-        entity[u'owner'] = user_info(repo.owner).name
+            entity['description'] = repo['description']
+        entity['url'] = repo['html_url']
+        entity['owner'] = user_info(repo['owner']).name
         DBSession.add(entity)
     return Entity.by_name(repo_name)
 
