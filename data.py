@@ -55,11 +55,7 @@ def event_info(event):
         entity = Entity(event_name)
         entity['name'] = event_name
         entity[u'actor'] = user_info(event['actor']).name
-        try:
-            entity[u'repo'] = repo_info(event['repo']).name
-        except:
-            # I think this means the repo no longer exists.
-            entity[u'repo'] = event['repo']['name']
+        entity[u'repo'] = event['repo']['name']
         entity[u'type'] = event['type']
         entity[u'payload'] = event['payload']
         entity[u'created_at'] = datetime.strptime(event['created_at'], '%Y-%m-%dT%H:%M:%SZ')
@@ -92,7 +88,8 @@ def user_info(user):
 
 
 def repo_info(repo):
-    repo_name = u'repo_{0}'.format(repo['id'])
+    repo_name = repo.get('full_name', '{0}/{1}'.foramt(repo['owner']['login'],
+                                                       repo['name']
     if not Entity.by_name(repo_name):
         print("Caching new repository {0}".format(repo_name))
         entity = Entity(repo_name)

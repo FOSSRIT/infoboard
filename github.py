@@ -23,6 +23,9 @@ class Github(object):
         events = self.requests_wrapper('https://api.github.com/users/%s/events' % user_name)
         return map(data.event_info, events)
 
+    def repo_information(self, repo_name):
+        repository = self.requests_wrapper('https://api.github.com/repos/%s' % repo_name)
+        return data.repo_info(repository)
 
 
 if __name__ == "__main__":

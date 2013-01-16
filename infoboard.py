@@ -163,13 +163,19 @@ class EventWidget(Gtk.EventBox):
         self.event = event
         user = Entity.by_name(event[u'actor'])
         user_name = user[u'name'].encode('utf-8')
-        repo = Entity.by_name(event[u'repo'])
-        if repo:
+        repo = event[u'repo']
+        if not Entity.by_name(repo):
+            try:
+                repo = g.repo_information(repo)
+            except:
+                repo_link = event[u'repo']
+                repo_desc = ''
+        else:
+            repo = Entity.by_name(repo)
+
+        if not isinstance(repo, basestring):
             repo_link = '<a href="{0}">{1}</a>'.format(repo['url'], repo['name'])
             repo_desc = repo['description']
-        else:
-            repo_link = event[u'repo']
-            repo_desc = ''
 
         self.box.pack_start(url_to_image(user[u'avatar'], user[u'gravatar'], self.scale),
                             False, False, 10)
