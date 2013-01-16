@@ -1,3 +1,6 @@
+
+from urllib2 import HTTPError
+
 import requests
 import json
 
@@ -13,6 +16,8 @@ class Github(object):
         r = requests.get(url, auth=self.auth)
         self.rate_limiting = (r.headers['x-ratelimit-remaining'],
                               r.headers['x-ratelimit-limit'])
+        if r.status_code == 404:
+            r.raise_for_status()
 
         data = json.loads(r.content)
         return data
