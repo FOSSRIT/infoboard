@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """InfoBoard is a Python/GTK3 app for displaying live info about developers"""
+from __future__ import unicode_literals
 
 import os
 import re
@@ -27,7 +28,7 @@ class InfoWin(Gtk.Window):
         super(InfoWin, self).__init__()
         self.set_default_size(800, 800)
         try:
-            self.org = g.get_organization(settings['organization'])
+            self.org = settings['organization']
             self.max_size = int(settings['events'])
             self.max_repos = int(settings['repositories'])
             self.max_users = int(settings['users'])
@@ -36,7 +37,7 @@ class InfoWin(Gtk.Window):
         except KeyError:
             print("Something is wrong with your configuration file.")
             print("Using defaults...")
-            self.org = g.get_organization("FOSSRIT")
+            self.org = "FOSSRIT"
             self.max_size = 20
             self.max_repos = 3
             self.max_users = 3
@@ -76,8 +77,9 @@ class InfoWin(Gtk.Window):
         newest_events = data.recent_events(limit=self.max_size)
 
         try:
-            members = self.org.get_members()
-            newest_events = filter(lambda event: event['actor'] in members,
+            members = g.organization_members(self.org)
+            logins = filter(lambda user: user['name'], members)
+            newest_events = filter(lambda event: event['actor'] in logins,
                                    newest_events)
         except:
             print('Error getting members')
@@ -85,24 +87,16 @@ class InfoWin(Gtk.Window):
 
         for user in members:
             try:
-                user_events = iter(user.get_events())
+                user_events = g.user_activity(user['login'])
             except:
                 print("Something went wrong updating the events.")
                 continue
 
-            limit = self.max_size
-            while limit > 0:
-                try:
-                    event = data.event_info(user_events.next())
-                except:
-                    print("Couldn't get events for user")
-                    # We either ran out of elements early, or hit a problem
-                    # pinging Github.  Either way, skip to the next user.
-                    break
+            size = min(self.max_size, len(user_events))
+            for event in user_events[:size]:
                 if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
                     break
                 newest_events.append(event)
-                limit -= 1
 
         newest_events.sort(key=lambda event: event[u'created_at'], reverse=True)
         size = min(len(newest_events), self.max_size)
@@ -170,13 +164,19 @@ class EventWidget(Gtk.EventBox):
         self.event = event
         user = Entity.by_name(event[u'actor'])
         user_name = user[u'name'].encode('utf-8')
-        repo = Entity.by_name(event[u'repo'])
-        if repo:
+        repo = event[u'repo']
+        if not Entity.by_name(repo):
+            try:
+                repo = g.repo_information(repo)
+            except:
+                repo_link = event[u'repo']
+                repo_desc = ''
+        else:
+            repo = Entity.by_name(repo)
+
+        if not isinstance(repo, basestring):
             repo_link = '<a href="{0}">{1}</a>'.format(repo['url'], repo['name'])
             repo_desc = repo['description']
-        else:
-            repo_link = event[u'repo']
-            repo_desc = ''
 
         self.box.pack_start(url_to_image(user[u'avatar'], user[u'gravatar'], self.scale),
                             False, False, 10)
@@ -367,7 +367,7 @@ if __name__ == "__main__":
     yaml_location = os.path.join(os.path.split(__file__)[0], 'settings.yaml')
     with open(yaml_location) as yaml_file:
         conf = yaml.load(yaml_file)
-    g = Github(conf['user'], conf['password'])
+    g = Github((conf['user'], conf['password']))
     win = InfoWin(conf)
     win.connect("delete-event", Gtk.main_quit)
 
