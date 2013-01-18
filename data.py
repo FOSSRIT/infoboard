@@ -2,6 +2,7 @@
 Many calls to PyGithub hide lazy calls to the Github API.  These functions
 wrap the actual work so that the data returned can get cached in Knowledge.
 """
+from __future__ import unicode_literals
 
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -88,8 +89,8 @@ def user_info(user):
 
 
 def repo_info(repo):
-    repo_name = repo.get('full_name', '{0}/{1}'.foramt(repo['owner']['login'],
-                                                       repo['name']
+    repo_name = repo.get('full_name', '{0}/{1}'.format(repo['owner']['login'],
+                                                       repo['name']))
     if not Entity.by_name(repo_name):
         print("Caching new repository {0}".format(repo_name))
         entity = Entity(repo_name)

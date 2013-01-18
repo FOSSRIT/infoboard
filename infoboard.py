@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """InfoBoard is a Python/GTK3 app for displaying live info about developers"""
+from __future__ import unicode_literals
 
 import os
 import re

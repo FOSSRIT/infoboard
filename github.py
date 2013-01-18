@@ -1,3 +1,5 @@
+"""Provides a wrapper around certain github API calls."""
+from __future__ import unicode_literals
 
 from urllib2 import HTTPError
 
