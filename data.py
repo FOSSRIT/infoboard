@@ -85,6 +85,7 @@ def user_info(user):
         else:
             entity[u'name'] = user['login']
         DBSession.add(entity)
+        DBSession.commit()
     return Entity.by_name(user_name)
 
 
@@ -103,6 +104,7 @@ def repo_info(repo):
         entity['url'] = repo['html_url']
         entity['owner'] = user_info(repo['owner']).name
         DBSession.add(entity)
+        DBSession.commit()
     return Entity.by_name(repo_name)
 
 
@@ -113,6 +115,7 @@ def comment_info(comment):
         entity = Entity(comment_name)
         entity[u'body'] = comment['body']
         DBSession.add(entity)
+        DBSession.commit()
     return Entity.by_name(comment_name)
 
 
@@ -124,4 +127,5 @@ def issue_info(issue):
         entity[u'title'] = issue['title']
         entity[u'number'] = issue['number']
         DBSession.add(entity)
+        DBSession.commit()
     return Entity.by_name(issue_name)
