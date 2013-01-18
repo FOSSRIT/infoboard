@@ -21,8 +21,8 @@ class Github(object):
         if r.status_code == 404:
             r.raise_for_status()
 
-        data = json.loads(r.content)
-        return data
+        content = json.loads(r.content)
+        return content
 
     def organization_members(self, org_name):
         members = self.requests_wrapper('https://api.github.com/orgs/%s/members' % org_name)
