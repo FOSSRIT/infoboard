@@ -89,7 +89,8 @@ class InfoWin(Gtk.Window):
             try:
                 user_events = g.user_activity(user['login'])
             except:
-                print("Something went wrong updating the events.")
+                print("Something went wrong updating the events for {0}." \
+                      .format(user['login']))
                 continue
 
             size = min(self.max_size, len(user_events))
