@@ -66,7 +66,6 @@ def event_info(event):
             entity['issue'] = issue_info(event['payload']['issue']).name
         DBSession.add(entity)
         DBSession.commit()
-        print("Done caching event {0}".format(event_name))
     return Entity.by_name(event_name)
 
 
