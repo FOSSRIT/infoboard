@@ -164,7 +164,7 @@ class EventWidget(Gtk.EventBox):
     def populate(self, event):
         self.event = event
         user = Entity.by_name(event[u'actor'])
-        user_name = user[u'name'].encode('utf-8')
+        user_name = user[u'name']
         repo = event[u'repo']
         if not Entity.by_name(repo):
             try:
@@ -220,10 +220,10 @@ class EventWidget(Gtk.EventBox):
             target = event['payload']['target']
             try:
                 event_text.append("{0} is now following {1}."
-                    .format(user_name, target['name'].encode('utf-8')))
+                    .format(user_name, target['name']))
             except KeyError:
                 event_text.append("{0} is now following {1}."
-                    .format(user_name, target['login'].encode('utf-8')))
+                    .format(user_name, target['login']))
         elif event[u'type'] == "ForkEvent":
             color = event_colors['branch']
             try:
