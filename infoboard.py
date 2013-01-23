@@ -15,9 +15,6 @@ from github import Github
 base_dir = os.path.split(__file__)[0]
 from sqlalchemy import create_engine
 from knowledge.model import init_model, metadata, Entity
-engine = create_engine('sqlite://{0}/knowledge.db'.format(base_dir))
-init_model(engine)
-metadata.create_all(engine)
 
 import yaml
 import data
@@ -365,9 +362,16 @@ def mk_label(text):
 
 
 if __name__ == "__main__":
+    # Load conf file
     yaml_location = os.path.join(os.path.split(__file__)[0], 'settings.yaml')
     with open(yaml_location) as yaml_file:
         conf = yaml.load(yaml_file)
+
+    # Set up Knowledge
+    engine = create_engine(conf['db_uri'])
+    init_model(engine)
+    metadata.create_all(engine)
+
     g = Github((conf['user'], conf['password']))
     win = InfoWin(conf)
     win.connect("delete-event", Gtk.main_quit)

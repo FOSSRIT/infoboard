@@ -6,3 +6,4 @@ users: 1
 repositories: 1
 scale: 1
 interval: 360000
+db_uri: sqlite:///knowledge.db
