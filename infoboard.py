@@ -355,6 +355,8 @@ def url_to_image(url, filename, scale=1):
 
 def mk_label(text):
     text = re.sub('<img', '&lt;img', text)
+    text = re.sub('<h1', '&lt;h1', text)
+    text = re.sub('&', '&amp;', text)
     label = Gtk.Label()
     label.set_markup(text)
     label.set_line_wrap(True)
