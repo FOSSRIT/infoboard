@@ -11,7 +11,7 @@ from knowledge.model import DBSession, Entity
 
 
 def recent_events(days=0, limit=0):
-    events = DBSession.query(Entity).filter(Entity.name.like('event%')).all()
+    events = DBSession.query(Entity).filter(Entity.name.like('event\_%')).all()
     if days > 0:
         yesterday = datetime.now() - timedelta(days=days)
         events = filter(lambda event: event['created_at'] > yesterday, events)
