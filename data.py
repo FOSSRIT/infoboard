@@ -2,7 +2,7 @@
 Many calls to PyGithub hide lazy calls to the Github API.  These functions
 wrap the actual work so that the data returned can get cached in Knowledge.
 """
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -11,7 +11,9 @@ from knowledge.model import DBSession, Entity
 
 
 def recent_events(days=0, limit=0):
-    events = DBSession.query(Entity).filter(Entity.name.like('event\_%')).all()
+    events = DBSession.query(Entity) \
+                      .filter(Entity.name.startswith('event\_', escape='\\')) \
+                      .all()
     if days > 0:
         yesterday = datetime.now() - timedelta(days=days)
         events = filter(lambda event: event['created_at'] > yesterday, events)

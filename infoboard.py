@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """InfoBoard is a Python/GTK3 app for displaying live info about developers"""
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import os
 import re
@@ -126,7 +126,6 @@ class InfoWin(Gtk.Window):
     def add_hilights(self):
         top_users, top_repos = data.top_contributions()
         self.hilights.foreach(lambda widget, _: self.hilights.remove(widget), None)
-
 
         sorted_users = sorted(top_users,
                               key=lambda user: top_users[user]['count'],
