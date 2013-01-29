@@ -4,6 +4,7 @@ wrap the actual work so that the data returned can get cached in Knowledge.
 """
 from __future__ import print_function, unicode_literals
 
+from cgi import escape
 from collections import defaultdict
 from datetime import datetime, timedelta
 
@@ -114,7 +115,7 @@ def comment_info(comment):
     if not Entity.by_name(comment_name):
         print("Caching new comment {0}".format(comment_name))
         entity = Entity(comment_name)
-        entity[u'body'] = comment['body']
+        entity[u'body'] = escape(comment['body'])
         DBSession.add(entity)
         DBSession.commit()
     return Entity.by_name(comment_name)

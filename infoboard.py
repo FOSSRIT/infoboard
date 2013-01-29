@@ -6,6 +6,7 @@ from __future__ import print_function, unicode_literals
 import os
 import re
 
+from cgi import escape
 from urllib import urlretrieve
 
 from gi.repository import Gtk, GdkPixbuf, Gdk, GObject
@@ -284,7 +285,7 @@ class EventWidget(Gtk.EventBox):
                 .format(user_name, event[u'payload']['size'],
                         repo_link))
             for commit in event[u'payload']['commits']:
-                event_text.append(u'• ' + commit['message'])
+                event_text.append(u'• ' + escape(commit['message']))
         #TeamAddEvent
         elif event[u'type'] == "WatchEvent":
             color = event_colors['social']
@@ -353,9 +354,6 @@ def url_to_image(url, filename, scale=1):
 
 
 def mk_label(text):
-    text = re.sub('<img', '&lt;img', text)
-    text = re.sub('<h1', '&lt;h1', text)
-    text = re.sub('&', '&amp;', text)
     label = Gtk.Label()
     label.set_markup(text)
     label.set_line_wrap(True)
