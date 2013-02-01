@@ -1,6 +1,7 @@
 """Provides a wrapper around certain github API calls."""
 from __future__ import unicode_literals
 
+from cgi import escape
 from urllib2 import HTTPError
 
 import requests
@@ -21,7 +22,7 @@ class Github(object):
         if r.status_code == 404:
             r.raise_for_status()
 
-        content = json.loads(r.content)
+        content = json.loads(escape(r.content))
         return content
 
     def organization_members(self, org_name):
