@@ -16,7 +16,10 @@ class Github(object):
         self.rate_limiting = (5000, 5000)
 
     def requests_wrapper(self, url):
-        r = requests.get(url, auth=self.auth)
+        if self.auth:
+            r = requests.get(url, auth=self.auth)
+        else:
+            r = requests.get(url)
         self.rate_limiting = (r.headers['x-ratelimit-remaining'],
                               r.headers['x-ratelimit-limit'])
         if r.status_code == 404:

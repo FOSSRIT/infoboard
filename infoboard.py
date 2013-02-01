@@ -370,7 +370,10 @@ if __name__ == "__main__":
     init_model(engine)
     metadata.create_all(engine)
 
-    g = Github((conf['user'], conf['password']))
+    if conf['user'] and conf['password']:
+        g = Github((conf['user'], conf['password']))
+    else:
+        g = Github()
     win = InfoWin(conf)
     win.connect("delete-event", Gtk.main_quit)
 
