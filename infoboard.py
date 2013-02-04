@@ -277,7 +277,12 @@ class EventWidget(Gtk.EventBox):
             event_text.append("{0} {1} pull request #{2} in {3}."
                 .format(user_name, event['payload']['action'],
                         event['payload']['number'], repo_link))
-        #PullRequestReviewCommentEvent
+        elif event['type'] == 'PullRequestReviewCommentEvent':
+            color = event_colors['social']
+            event_text.append("{0} commented on an issue in {1}."
+                              .format(user_name, repo_link))
+            comment = Entity.by_name(event['comment'])
+            event_text.append(comment['body'])
         elif event[u'type'] == "PushEvent":
             color = event_colors['commit']
             event_text.append("{0} pushed {1} commit(s) to {2}."
