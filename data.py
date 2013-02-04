@@ -62,9 +62,9 @@ def event_info(event):
         entity[u'type'] = event['type']
         entity[u'payload'] = event['payload']
         entity[u'created_at'] = datetime.strptime(event['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-        if event['type'] in ["CommitCommentEvent", "IssueCommentEvent"]:
+        if 'Comment' in event['type']:
             entity[u'comment'] = comment_info(event['payload']['comment']).name
-        if event['type'] in ["IssueCommentEvent", "IssuesEvent"]:
+        if 'Issue' in event['type']:
             entity['issue'] = issue_info(event['payload']['issue']).name
         DBSession.add(entity)
         DBSession.commit()
