@@ -55,4 +55,4 @@ if __name__ == '__main__':
 
     while True:
         cache_events(client, conf['organization'], conf['events'])
-        sleep(600)
+        sleep(conf['interval'])
