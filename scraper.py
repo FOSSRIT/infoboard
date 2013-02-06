@@ -57,5 +57,5 @@ if __name__ == '__main__':
         client = Github()
 
     while True:
-        cache_events(client, conf['organization'], conf['events'])
+        cache_events(client, conf['organization'])
         sleep(conf['interval'])
