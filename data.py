@@ -60,7 +60,10 @@ def event_info(event):
         entity = Entity(event_name)
         entity['name'] = event_name
         entity[u'actor'] = user_info(event['actor']).name
-        entity[u'repo'] = event['repo']['name']
+        try:
+            entity[u'repo'] = repo_info(event['repo']['name']).name
+        else:
+            entity['repo'] = event['repo']['name']
         entity[u'type'] = event['type']
         entity[u'payload'] = event['payload']
         entity[u'created_at'] = datetime.strptime(event['created_at'], '%Y-%m-%dT%H:%M:%SZ')

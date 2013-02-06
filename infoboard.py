@@ -9,7 +9,6 @@ import re
 from urllib import urlretrieve
 
 from gi.repository import Gtk, GdkPixbuf, Gdk, GObject
-from github import Github
 
 # Setup caching
 base_dir = os.path.split(__file__)[0]
@@ -62,9 +61,8 @@ class InfoWin(Gtk.Window):
         events = data.recent_events(limit=self.max_size)
         self.add_more_events(events)
         self.add_hilights()
-
-        print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
         self.show_all()
+        print("Refresh completed")
         return True
 
     def add_more_events(self, new_events):
@@ -129,16 +127,12 @@ class EventWidget(Gtk.EventBox):
         user = Entity.by_name(event[u'actor'])
         user_name = user[u'name']
         repo = event[u'repo']
+
         if not Entity.by_name(repo):
-            try:
-                repo = g.repo_information(repo)
-            except:
-                repo_link = event[u'repo']
-                repo_desc = ''
+            repo_link = event[u'repo']
+            repo_desc = ''
         else:
             repo = Entity.by_name(repo)
-
-        if not isinstance(repo, basestring):
             repo_link = '<a href="{0}">{1}</a>'.format(repo['url'], repo['name'])
             repo_desc = repo['description']
 
@@ -342,10 +336,6 @@ if __name__ == "__main__":
     init_model(engine)
     metadata.create_all(engine)
 
-    if conf['user'] and conf['password']:
-        g = Github((conf['user'], conf['password']))
-    else:
-        g = Github()
     win = InfoWin(conf)
     win.connect("delete-event", Gtk.main_quit)
 
