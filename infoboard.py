@@ -59,46 +59,13 @@ class InfoWin(Gtk.Window):
         GObject.timeout_add(self.reload_interval, self.refresh)
 
     def refresh(self):
-        events = self.cache_new_events()
+        events = data.recent_events(limit=self.max_size)
         self.add_more_events(events)
         self.add_hilights()
 
         print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
         self.show_all()
         return True
-
-    def cache_new_events(self):
-        """Pull new events from Github and return the [max_size] newest
-           events.
-        """
-        newest_events = data.recent_events(limit=self.max_size)
-
-        try:
-            members = g.organization_members(self.org)
-            logins = filter(lambda user: user['name'], members)
-            newest_events = filter(lambda event: event['actor'] in logins,
-                                   newest_events)
-        except:
-            print('Error getting members')
-            return newest_events
-
-        for user in members:
-            try:
-                user_events = g.user_activity(user['login'])
-            except:
-                print("Something went wrong updating the events for {0}." \
-                      .format(user['login']))
-                continue
-
-            size = min(self.max_size, len(user_events))
-            for event in user_events[:size]:
-                if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
-                    break
-                newest_events.append(event)
-
-        newest_events.sort(key=lambda event: event[u'created_at'], reverse=True)
-        size = min(len(newest_events), self.max_size)
-        return newest_events[:size]
 
     def add_more_events(self, new_events):
         """Take the new events and add them to the screen, then remove any
