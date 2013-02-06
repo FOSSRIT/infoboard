@@ -11,6 +11,7 @@ from knowledge.model import DBSession, Entity
 
 
 def recent_events(days=0, limit=0):
+    DBSession.commit()
     events = DBSession.query(Entity) \
                       .filter(Entity.name.startswith('event\_', escape='\\')) \
                       .all()
