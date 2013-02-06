@@ -62,7 +62,7 @@ def event_info(event):
         entity[u'actor'] = user_info(event['actor']).name
         try:
             entity[u'repo'] = repo_info(event['repo']['name']).name
-        else:
+        except:
             entity['repo'] = event['repo']['name']
         entity[u'type'] = event['type']
         entity[u'payload'] = event['payload']
