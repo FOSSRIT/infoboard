@@ -23,11 +23,15 @@ def cache_events(client, org):
 
     for user in members:
         try:
-            client.user_activity(user['login'])
+            events = client.user_activity(user['login'])
+            for event in events:
+                if not Entity.by_name(event['repo']):
+                    client.repo_information(event['repo'])
         except:
             print("Something went wrong updating the events for {0}." \
                   .format(user['login']))
             continue
+
 
     print("You have {0} of {1} calls left this hour."
           .format(*client.rate_limiting))
