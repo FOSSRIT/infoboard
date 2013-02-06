@@ -58,17 +58,19 @@ class InfoWin(Gtk.Window):
         GObject.timeout_add(self.reload_interval, self.refresh)
 
     def refresh(self):
-        events = data.recent_events(limit=self.max_size)
-        self.add_more_events(events)
+        self.add_more_events()
         self.add_hilights()
         self.show_all()
         print("Refresh completed")
         return True
 
-    def add_more_events(self, new_events):
+    def add_more_events(self):
         """Take the new events and add them to the screen, then remove any
            that are too old.
         """
+        # Check the DB for events
+        new_events = data.recent_events(limit=self.max_size)
+
         # Get what's on the screen and remove them from the update queue
         extant_events = map(lambda spot: spot.event, self.event_box.get_children())
         new_events = filter(lambda event: event not in extant_events, new_events)
