@@ -8,27 +8,22 @@ from knowledge.model import init_model, metadata, Entity
 import yaml
 
 from github import Github
-import data
 
 
-def cache_events(client, org, limit):
+def cache_events(client, org):
     """Pull new events from Github and return the [max_size] newest
        events.
     """
-    newest_events = data.recent_events(limit=limit)
 
     try:
         members = client.organization_members(org)
-        logins = filter(lambda user: user['name'], members)
-        newest_events = filter(lambda event: event['actor'] in logins,
-                               newest_events)
     except:
         print('Error getting members')
-        return newest_events
+        return
 
     for user in members:
         try:
-            user_events = client.user_activity(user['login'])
+            client.user_activity(user['login'])
         except:
             print("Something went wrong updating the events for {0}." \
                   .format(user['login']))
