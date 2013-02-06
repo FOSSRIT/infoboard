@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""
+This script connects to the infoboard db and scrapes github calls at regular
+intervals.  It should cache all the events and repositories it sees for later
+use by the frontend(s).
+"""
+
 from __future__ import print_function, unicode_literals
 from time import sleep
 import os
@@ -11,9 +17,7 @@ from github import Github
 
 
 def cache_events(client, org):
-    """Pull new events from Github and return the [max_size] newest
-       events.
-    """
+    """Pull new events from Github."""
 
     try:
         members = client.organization_members(org)
