@@ -276,15 +276,33 @@ class Hilight(Gtk.EventBox):
 
     def build_user(self, user_id, user_info):
         user = Entity.by_name(user_id)
+        display_key = {
+            'CommitCommentEvent': ('commented on', 'commits'),
+            'CreateEvent': ('created', 'tags, branches, or repositories'),
+            'DeleteEvent': ('deleted', 'tags, branches, or repositories'),
+            'FollowEvent': ('followed', 'users'),
+            'ForkEvent': ('forked', 'repositories'),
+            'GistEvent': ('made or modified', 'gists'),
+            'GollumEvent': ('made or modified', 'wiki pages'),
+            'IssueCommentEvent': ('commented on', 'issues'),
+            'IssuesEvent': ('made or modified', 'issues'),
+            'PullRequestEvent': ('made or modified', 'pull requests'),
+            'PullRequestReviewCommentEvent': ('commented on', 'pull requests'),
+            'PushEvent': ('pushed', 'commits'),
+            'WatchEvent': ('watched', 'repositories'),
+        }
 
         text = ["{0} has been very busy this week!".format(user['name'])]
         for event_type, count in user_info.items():
             if event_type == 'count':
                 continue
-            elif event_type == 'social actions':
+            elif event_type in ['CommitCommentEvent', 'FollowEvent',
+                                'IssueCommentEvent', 'WatchEvent',
+                                'PullRequestReviewCommentEvent',]:
                 count = int(count * 10)
-            text.append("{0} made {1} {2} this week."
-                .format(user['name'], count, event_type))
+            display_text = display_key.get(event_type, ('made', event_type))
+            text.append("{0} {1[0]} {2} {1[1]} this week."
+                .format(user['name'], display_text, count, event_type))
 
         self.finish(user, text)
 

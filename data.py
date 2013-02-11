@@ -29,20 +29,18 @@ def top_contributions():
     user_activity = defaultdict(lambda: defaultdict(int))
     repo_activity = defaultdict(lambda: defaultdict(int))
     for event in week_activity:
+        changes = 1
+
         if event['type'] == 'PushEvent':
             changes = event['payload']['size']
-            key = 'commits'
         elif event['type'] in ['CommitCommentEvent', 'FollowEvent',
                                'IssueCommentEvent', 'WatchEvent',
                                'PullRequestReviewCommentEvent',]:
             # Social (non-coding) events carry less weight
             changes = .1
-            key = 'social actions'
-        else:
-            changes = 1
-            key = event['type']
+
         user_activity[event['actor']]['count'] += changes
-        user_activity[event['actor']][key] += changes
+        user_activity[event['actor']][event['type']] += changes
 
         if Entity.by_name(event['repo']):
             if event['type'] in ['CommitCommentEvent', 'FollowEvent',
