@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """InfoBoard is a Python/GTK3 app for displaying live info about developers"""
+from __future__ import print_function, unicode_literals
 
 import os
 import re
@@ -8,15 +9,11 @@ import re
 from urllib import urlretrieve
 
 from gi.repository import Gtk, GdkPixbuf, Gdk, GObject
-from github import Github
 
 # Setup caching
 base_dir = os.path.split(__file__)[0]
 from sqlalchemy import create_engine
 from knowledge.model import init_model, metadata, Entity
-engine = create_engine('sqlite://{0}/knowledge.db'.format(base_dir))
-init_model(engine)
-metadata.create_all(engine)
 
 import yaml
 import data
@@ -27,19 +24,21 @@ class InfoWin(Gtk.Window):
         super(InfoWin, self).__init__()
         self.set_default_size(800, 800)
         try:
-            self.org = g.get_organization(settings['organization'])
+            self.org = settings['organization']
             self.max_size = int(settings['events'])
             self.max_repos = int(settings['repositories'])
             self.max_users = int(settings['users'])
             self.scale = float(settings['scale'])
+            self.reload_interval = int(settings['interval'])
         except KeyError:
             print("Something is wrong with your configuration file.")
             print("Using defaults...")
-            self.org = g.get_organization("FOSSRIT")
+            self.org = "FOSSRIT"
             self.max_size = 20
             self.max_repos = 3
             self.max_users = 3
             self.scale = .8
+            self.reload_interval = 360000
 
         scrolls = Gtk.ScrolledWindow()
         super_box = Gtk.Box(homogeneous=True)
@@ -56,59 +55,22 @@ class InfoWin(Gtk.Window):
         scrolls.add_with_viewport(super_box)
         self.add(scrolls)
         self.refresh()
-        GObject.timeout_add(360000, self.refresh)
+        GObject.timeout_add(self.reload_interval, self.refresh)
 
     def refresh(self):
-        events = self.cache_new_events()
-        self.add_more_events(events)
+        self.add_more_events()
         self.add_hilights()
-
-        print("You have {0} of {1} calls left this hour.".format(*g.rate_limiting))
+        self.show_all()
+        print("Refresh completed")
         return True
 
-    def cache_new_events(self):
-        """Pull new events from Github and return the [max_size] newest
-           events.
-        """
-        newest_events = data.recent_events(limit=self.max_size)
-
-        try:
-            members = self.org.get_members()
-            newest_events = filter(lambda event: event['actor'] in members,
-                                   newest_events)
-        except:
-            print('Error getting members')
-            return newest_events
-
-        for user in members:
-            try:
-                user_events = iter(user.get_events())
-            except:
-                print("Something went wrong updating the events.")
-                continue
-
-            limit = self.max_size
-            while limit > 0:
-                try:
-                    event = data.event_info(user_events.next())
-                except:
-                    print("Coouldn't get events for user")
-                    # We either ran out of elements early, or hit a problem
-                    # pinging Github.  Either way, skip to the next user.
-                    break
-                if len(newest_events) > 0 and event[u'created_at'] <= newest_events[0][u'created_at']:
-                    break
-                newest_events.append(event)
-                limit -= 1
-
-        newest_events.sort(key=lambda event: event[u'created_at'], reverse=True)
-        size = min(len(newest_events), self.max_size)
-        return newest_events[:size]
-
-    def add_more_events(self, new_events):
+    def add_more_events(self):
         """Take the new events and add them to the screen, then remove any
            that are too old.
         """
+        # Check the DB for events
+        new_events = data.recent_events(limit=self.max_size)
+
         # Get what's on the screen and remove them from the update queue
         extant_events = map(lambda spot: spot.event, self.event_box.get_children())
         new_events = filter(lambda event: event not in extant_events, new_events)
@@ -128,12 +90,9 @@ class InfoWin(Gtk.Window):
             for event_widget in self.event_box.get_children()[self.max_size:]:
                 self.event_box.remove(event_widget)
 
-        self.event_box.show_all()
-
     def add_hilights(self):
         top_users, top_repos = data.top_contributions()
         self.hilights.foreach(lambda widget, _: self.hilights.remove(widget), None)
-
 
         sorted_users = sorted(top_users,
                               key=lambda user: top_users[user]['count'],
@@ -168,14 +127,16 @@ class EventWidget(Gtk.EventBox):
     def populate(self, event):
         self.event = event
         user = Entity.by_name(event[u'actor'])
-        user_name = user[u'name'].encode('utf-8')
-        repo = Entity.by_name(event[u'repo'])
-        if repo:
-            repo_link = '<a href="{0}">{1}</a>'.format(repo['url'], repo['name'])
-            repo_desc = repo['description']
-        else:
+        user_name = user[u'name']
+        repo = event[u'repo']
+
+        if not Entity.by_name(repo):
             repo_link = event[u'repo']
             repo_desc = ''
+        else:
+            repo = Entity.by_name(repo)
+            repo_link = '<a href="{0}">{1}</a>'.format(repo['url'], repo['name'])
+            repo_desc = repo['description']
 
         self.box.pack_start(url_to_image(user[u'avatar'], user[u'gravatar'], self.scale),
                             False, False, 10)
@@ -218,10 +179,10 @@ class EventWidget(Gtk.EventBox):
             target = event['payload']['target']
             try:
                 event_text.append("{0} is now following {1}."
-                    .format(user_name, target['name'].encode('utf-8')))
+                    .format(user_name, target['name']))
             except KeyError:
                 event_text.append("{0} is now following {1}."
-                    .format(user_name, target['login'].encode('utf-8')))
+                    .format(user_name, target['login']))
         elif event[u'type'] == "ForkEvent":
             color = event_colors['branch']
             try:
@@ -279,7 +240,12 @@ class EventWidget(Gtk.EventBox):
             event_text.append("{0} {1} pull request #{2} in {3}."
                 .format(user_name, event['payload']['action'],
                         event['payload']['number'], repo_link))
-        #PullRequestReviewCommentEvent
+        elif event['type'] == 'PullRequestReviewCommentEvent':
+            color = event_colors['social']
+            event_text.append("{0} commented on an issue in {1}."
+                              .format(user_name, repo_link))
+            comment = Entity.by_name(event['comment'])
+            event_text.append(comment['body'])
         elif event[u'type'] == "PushEvent":
             color = event_colors['commit']
             event_text.append("{0} pushed {1} commit(s) to {2}."
@@ -299,7 +265,6 @@ class EventWidget(Gtk.EventBox):
         self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(color))
         event_label = mk_label('\n'.join(event_text))
         self.box.pack_start(event_label, False, False, 0)
-        self.show_all()
 
 
 class Hilight(Gtk.EventBox):
@@ -311,15 +276,33 @@ class Hilight(Gtk.EventBox):
 
     def build_user(self, user_id, user_info):
         user = Entity.by_name(user_id)
+        display_key = {
+            'CommitCommentEvent': ('commented on', 'commits'),
+            'CreateEvent': ('created', 'tags, branches, or repositories'),
+            'DeleteEvent': ('deleted', 'tags, branches, or repositories'),
+            'FollowEvent': ('followed', 'users'),
+            'ForkEvent': ('forked', 'repositories'),
+            'GistEvent': ('made or modified', 'gists'),
+            'GollumEvent': ('made or modified', 'wiki pages'),
+            'IssueCommentEvent': ('commented on', 'issues'),
+            'IssuesEvent': ('made or modified', 'issues'),
+            'PullRequestEvent': ('made or modified', 'pull requests'),
+            'PullRequestReviewCommentEvent': ('commented on', 'pull requests'),
+            'PushEvent': ('pushed', 'commits'),
+            'WatchEvent': ('watched', 'repositories'),
+        }
 
         text = ["{0} has been very busy this week!".format(user['name'])]
         for event_type, count in user_info.items():
             if event_type == 'count':
                 continue
-            elif event_type == 'social actions':
+            elif event_type in ['CommitCommentEvent', 'FollowEvent',
+                                'IssueCommentEvent', 'WatchEvent',
+                                'PullRequestReviewCommentEvent',]:
                 count = int(count * 10)
-            text.append("{0} made {1} {2} this week."
-                .format(user['name'], count, event_type))
+            display_text = display_key.get(event_type, ('made', event_type))
+            text.append("{0} {1[0]} {2} {1[1]} this week."
+                .format(user['name'], display_text, count, event_type))
 
         self.finish(user, text)
 
@@ -340,7 +323,6 @@ class Hilight(Gtk.EventBox):
         if user:
             self.box.add(url_to_image(user['avatar'], user['gravatar'], self.scale))
         self.box.add(mk_label('\n'.join(text)))
-        self.show_all()
 
 
 # Convenience functions to make Gtk Widgets
@@ -357,7 +339,6 @@ def url_to_image(url, filename, scale=1):
 
 
 def mk_label(text):
-    text = re.sub('<img', '&lt;img', text)
     label = Gtk.Label()
     label.set_markup(text)
     label.set_line_wrap(True)
@@ -365,12 +346,17 @@ def mk_label(text):
 
 
 if __name__ == "__main__":
+    # Load conf file
     yaml_location = os.path.join(os.path.split(__file__)[0], 'settings.yaml')
     with open(yaml_location) as yaml_file:
         conf = yaml.load(yaml_file)
-    g = Github(conf['user'], conf['password'])
+
+    # Set up Knowledge
+    engine = create_engine(conf['db_uri'])
+    init_model(engine)
+    metadata.create_all(engine)
+
     win = InfoWin(conf)
     win.connect("delete-event", Gtk.main_quit)
-    win.show_all()
 
     Gtk.main()
