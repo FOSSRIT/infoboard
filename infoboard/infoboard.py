@@ -248,10 +248,10 @@ class EventWidget(Gtk.EventBox):
             event_text.append(comment['body'])
         elif event[u'type'] == "PushEvent":
             color = event_colors['commit']
+            commits = filter(lambda x: x['distinct'], event[u'payload']['commits'])
             event_text.append("{0} pushed {1} commit(s) to {2}."
-                .format(user_name, event[u'payload']['size'],
-                        repo_link))
-            for commit in event[u'payload']['commits']:
+                .format(user_name, len(commits), repo_link))
+            for commit in commits:
                 event_text.append(u'• ' + commit['message'])
         #TeamAddEvent
         elif event[u'type'] == "WatchEvent":

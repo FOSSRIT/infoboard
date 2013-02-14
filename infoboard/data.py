@@ -32,7 +32,8 @@ def top_contributions():
         changes = 1
 
         if event['type'] == 'PushEvent':
-            changes = event['payload']['size']
+            commits = filter(lambda x: x['distinct'], event['payload']['commits'])
+            changes = len(commits)
         elif event['type'] in ['CommitCommentEvent', 'FollowEvent',
                                'IssueCommentEvent', 'WatchEvent',
                                'PullRequestReviewCommentEvent',]:
