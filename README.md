@@ -17,7 +17,8 @@ run if another frontend (web, JSON, IRC bot, etc) is desired.
 Configuration
 -------------
 
-The settings are stored in [settings.yaml] and should look something like this::
+The settings are stored in [settings.yaml](settings.yaml) and should look
+something like this::
 
     user:
     password:
