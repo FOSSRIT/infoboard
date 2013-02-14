@@ -18,7 +18,7 @@ Configuration
 -------------
 
 The settings are stored in [settings.yaml](settings.yaml) and should look
-something like this::
+something like this:
 
     user:
     password:
