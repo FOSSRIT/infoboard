@@ -27,7 +27,7 @@ something like this:
     users: 1
     repositories: 1
     scale: 1
-    interval: 360000
+    interval: 360
     db_uri: sqlite:///knowledge.db
 
 The settings `user` and `password` should be set to your Github
