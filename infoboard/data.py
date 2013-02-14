@@ -25,7 +25,7 @@ def recent_events(days=0, limit=0):
 
 
 def top_contributions():
-    week_activity = recent_events(7)
+    week_activity = recent_events(days=7)
     user_activity = defaultdict(lambda: defaultdict(int))
     repo_activity = defaultdict(lambda: defaultdict(int))
     for event in week_activity:
