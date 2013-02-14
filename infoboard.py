@@ -38,7 +38,7 @@ class InfoWin(Gtk.Window):
             self.max_repos = 3
             self.max_users = 3
             self.scale = .8
-            self.reload_interval = 360000
+            self.reload_interval = 360
 
         scrolls = Gtk.ScrolledWindow()
         super_box = Gtk.Box(homogeneous=True)
@@ -55,7 +55,7 @@ class InfoWin(Gtk.Window):
         scrolls.add_with_viewport(super_box)
         self.add(scrolls)
         self.refresh()
-        GObject.timeout_add(self.reload_interval, self.refresh)
+        GObject.timeout_add(self.reload_interval * 1000, self.refresh)
 
     def refresh(self):
         self.add_more_events()
