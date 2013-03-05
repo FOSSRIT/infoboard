@@ -22,7 +22,7 @@ import data
 class InfoWin(Gtk.Window):
     def __init__(self, settings):
         super(InfoWin, self).__init__()
-        self.set_default_size(800, 800)
+        self.maximize()
         try:
             self.org = settings['organization']
             self.max_size = int(settings['events'])
