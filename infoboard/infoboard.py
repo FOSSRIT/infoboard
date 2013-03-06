@@ -334,7 +334,7 @@ def url_to_image(url, filename, scale=1):
     local_path = os.path.join(base_dir, "image_cache", filename)
     if not os.path.exists(local_path):
         urlretrieve(url, local_path)
-    # Resize files to 80px x 80px
+    # Scale images to the desired size
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(local_path)
     size = scale * 100
     pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
