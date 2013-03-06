@@ -1,9 +1,12 @@
-user:
-password:
-organization: FOSSRIT
-events: 8
-users: 1
-repositories: 1
-scale: 1
-interval: 360
-db_uri: sqlite:///knowledge.db
+client:
+    events: 8
+    users: 1
+    repositories: 1
+    scale: 1
+backend:
+    user:
+    password:
+common:
+    organization: FOSSRIT
+    interval: 360
+    db_uri: sqlite:///knowledge.db

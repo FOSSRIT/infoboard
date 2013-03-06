@@ -24,12 +24,16 @@ class InfoWin(Gtk.Window):
         super(InfoWin, self).__init__()
         self.maximize()
         try:
-            self.org = settings['organization']
-            self.max_size = int(settings['events'])
-            self.max_repos = int(settings['repositories'])
-            self.max_users = int(settings['users'])
-            self.scale = float(settings['scale'])
-            self.reload_interval = int(settings['interval'])
+            client = settings['client']
+            common = settings['common']
+
+            self.max_size = int(client['events'])
+            self.max_repos = int(client['repositories'])
+            self.max_users = int(client['users'])
+            self.scale = float(client['scale'])
+
+            self.org = common['organization']
+            self.reload_interval = int(common['interval'])
         except KeyError:
             print("Something is wrong with your configuration file.")
             print("Using defaults...")
@@ -352,7 +356,7 @@ if __name__ == "__main__":
         conf = yaml.load(yaml_file)
 
     # Set up Knowledge
-    engine = create_engine(conf['db_uri'])
+    engine = create_engine(conf['common']['db_uri'])
     init_model(engine)
     metadata.create_all(engine)
 
