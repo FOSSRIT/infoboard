@@ -82,18 +82,21 @@ def user_info(user):
     if not Entity.by_name(user_name):
         print("Caching new user {0}".format(user_name))
         entity = Entity(user_name)
-        entity['login'] = user['login']
-        entity['gravatar'] = user['gravatar_id']
-        entity['avatar'] = u'http://www.gravatar.com/avatar/{0}?s=200' \
-                             .format(user['gravatar_id'])
-        # Not everyone has set a name for their account.
-        if user.get('name'):
-            entity[u'name'] = user['name']
-        else:
-            entity[u'name'] = user['login']
         DBSession.add(entity)
-        DBSession.commit()
-    return Entity.by_name(user_name)
+
+    entity = Entity.by_name(user_name)
+    entity['login'] = user['login']
+    entity['gravatar'] = user['gravatar_id']
+    entity['avatar'] = u'http://www.gravatar.com/avatar/{0}?s=200' \
+                         .format(user['gravatar_id'])
+    # Not everyone has set a name for their account.
+    if user.get('name'):
+        entity[u'name'] = user['name']
+    else:
+        entity[u'name'] = user['login']
+    DBSession.commit()
+
+    return entity
 
 
 def repo_info(repo):
@@ -102,17 +105,20 @@ def repo_info(repo):
     if not Entity.by_name(repo_name):
         print("Caching new repository {0}".format(repo_name))
         entity = Entity(repo_name)
-        entity['name'] = repo['full_name']
-        # Evidently you cannot set facts to None. (?)
-        if not repo['description']:
-            entity['description'] = u''
-        else:
-            entity['description'] = repo['description']
-        entity['url'] = repo['html_url']
-        entity['owner'] = user_info(repo['owner']).name
         DBSession.add(entity)
-        DBSession.commit()
-    return Entity.by_name(repo_name)
+
+    entity = Entity.by_name(repo_name)
+    entity['name'] = repo['full_name']
+    # Evidently you cannot set facts to None. (?)
+    if not repo['description']:
+        entity['description'] = u''
+    else:
+        entity['description'] = repo['description']
+    entity['url'] = repo['html_url']
+    entity['owner'] = user_info(repo['owner']).name
+    DBSession.commit()
+
+    return entity
 
 
 def comment_info(comment):
