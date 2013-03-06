@@ -22,14 +22,18 @@ import data
 class InfoWin(Gtk.Window):
     def __init__(self, settings):
         super(InfoWin, self).__init__()
-        self.set_default_size(800, 800)
+        self.maximize()
         try:
-            self.org = settings['organization']
-            self.max_size = int(settings['events'])
-            self.max_repos = int(settings['repositories'])
-            self.max_users = int(settings['users'])
-            self.scale = float(settings['scale'])
-            self.reload_interval = int(settings['interval'])
+            client = settings['client']
+            common = settings['common']
+
+            self.max_size = int(client['events'])
+            self.max_repos = int(client['repositories'])
+            self.max_users = int(client['users'])
+            self.scale = float(client['scale'])
+
+            self.org = common['organization']
+            self.reload_interval = int(common['interval'])
         except KeyError:
             print("Something is wrong with your configuration file.")
             print("Using defaults...")
@@ -248,10 +252,10 @@ class EventWidget(Gtk.EventBox):
             event_text.append(comment['body'])
         elif event[u'type'] == "PushEvent":
             color = event_colors['commit']
+            commits = filter(lambda x: x['distinct'], event[u'payload']['commits'])
             event_text.append("{0} pushed {1} commit(s) to {2}."
-                .format(user_name, event[u'payload']['size'],
-                        repo_link))
-            for commit in event[u'payload']['commits']:
+                .format(user_name, len(commits), repo_link))
+            for commit in commits:
                 event_text.append(u'• ' + commit['message'])
         #TeamAddEvent
         elif event[u'type'] == "WatchEvent":
@@ -330,7 +334,7 @@ def url_to_image(url, filename, scale=1):
     local_path = os.path.join(base_dir, "image_cache", filename)
     if not os.path.exists(local_path):
         urlretrieve(url, local_path)
-    # Resize files to 80px x 80px
+    # Scale images to the desired size
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(local_path)
     size = scale * 100
     pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
@@ -352,7 +356,7 @@ if __name__ == "__main__":
         conf = yaml.load(yaml_file)
 
     # Set up Knowledge
-    engine = create_engine(conf['db_uri'])
+    engine = create_engine(conf['common']['db_uri'])
     init_model(engine)
     metadata.create_all(engine)
 

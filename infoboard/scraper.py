@@ -45,17 +45,19 @@ if __name__ == '__main__':
     yaml_location = os.path.join(os.path.split(__file__)[0], 'settings.yaml')
     with open(yaml_location) as yaml_file:
         conf = yaml.load(yaml_file)
+    backend = conf['backend']
+    common = conf['common']
 
     # Set up Knowledge
-    engine = create_engine(conf['db_uri'])
+    engine = create_engine(common['db_uri'])
     init_model(engine)
     metadata.create_all(engine)
 
-    if conf['user'] and conf['password']:
-        client = Github((conf['user'], conf['password']))
+    if backend['user'] and backend['password']:
+        client = Github((backend['user'], backend['password']))
     else:
         client = Github()
 
     while True:
-        cache_events(client, conf['organization'])
-        sleep(conf['interval'])
+        cache_events(client, common['organization'])
+        sleep(common['interval'])
