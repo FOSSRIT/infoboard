@@ -14,12 +14,14 @@ class Github(object):
     def __init__(self, auth=None):
         self.auth = auth
         self.rate_limiting = (5000, 5000)
+        self.broken_repos = ['/']
 
     def requests_wrapper(self, url):
         if self.auth:
             r = requests.get(url, auth=self.auth)
         else:
             r = requests.get(url)
+
         self.rate_limiting = (r.headers['x-ratelimit-remaining'],
                               r.headers['x-ratelimit-limit'])
         if r.status_code == 404:
@@ -37,8 +39,16 @@ class Github(object):
         return map(data.event_info, events)
 
     def repo_information(self, repo_name):
-        repository = self.requests_wrapper('https://api.github.com/repos/%s' % repo_name)
-        return data.repo_info(repository)
+        if repo_name in self.broken_repos:
+            return
+        try:
+            repository = self._requests_wrapper('https://api.github.com/repos/%s' % repo_name)
+            return data.repo_info(repository)
+        except requests.exceptions.HTTPError:
+            logging.error("Error finding repo http://github.com/{0}"
+                          .format(repo_name))
+            self.broken_repos.append(repo_name)
+            return None
 
 
 if __name__ == "__main__":
