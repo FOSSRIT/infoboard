@@ -17,11 +17,14 @@ class Github(object):
         self.rate_limiting = (5000, 5000)
         self.broken_repos = ['/']
 
-    def requests_wrapper(self, url):
-        if self.auth:
-            r = requests.get(url, auth=self.auth)
-        else:
-            r = requests.get(url)
+    def _requests_wrapper(self, url):
+        try:
+            if self.auth:
+                r = requests.get(url, auth=self.auth)
+            else:
+                r = requests.get(url)
+        except requests.exception.ConnectionError:
+            return []
 
         self.rate_limiting = (r.headers['x-ratelimit-remaining'],
                               r.headers['x-ratelimit-limit'])
@@ -32,11 +35,11 @@ class Github(object):
         return content
 
     def organization_members(self, org_name):
-        members = self.requests_wrapper('https://api.github.com/orgs/%s/members' % org_name)
+        members = self._requests_wrapper('https://api.github.com/orgs/%s/members' % org_name)
         return map(data.user_info, members)
 
     def user_activity(self, user_name):
-        events = self.requests_wrapper('https://api.github.com/users/%s/events' % user_name)
+        events = self._requests_wrapper('https://api.github.com/users/%s/events' % user_name)
         return map(data.event_info, events)
 
     def repo_information(self, repo_name):
