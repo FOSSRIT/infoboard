@@ -5,8 +5,9 @@ intervals.  It should cache all the events and repositories it sees for later
 use by the frontend(s).
 """
 
-from __future__ import print_function, unicode_literals
+from __future__ import unicode_literals
 from time import sleep
+import logging
 import os
 
 from sqlalchemy import create_engine
@@ -22,26 +23,25 @@ def cache_events(client, org):
     try:
         members = client.organization_members(org)
     except:
-        print('Error getting members')
+        logging.error('Error getting members')
         return
 
+    client.broken_repos = ['/']
     for user in members:
-        try:
-            events = client.user_activity(user['login'])
-            for event in events:
-                if not Entity.by_name(event['repo']):
-                    client.repo_information(event['repo'])
-        except:
-            print("Something went wrong updating the events for {0}." \
-                  .format(user['login']))
-            continue
+        logging.debug("Looking up user {}".format(user))
+        events = client.user_activity(user['login'])
+        for event in events:
+            if not Entity.by_name(event['repo']):
+                client.repo_information(event['repo'])
 
 
-    print("You have {0} of {1} calls left this hour."
+    logging.info("You have {0} of {1} calls left this hour."
           .format(*client.rate_limiting))
 
 
 if __name__ == '__main__':
+    loglog = logging.getLogger()
+    loglog.setLevel(logging.INFO)
     yaml_location = os.path.join(os.path.split(__file__)[0], 'settings.yaml')
     with open(yaml_location) as yaml_file:
         conf = yaml.load(yaml_file)

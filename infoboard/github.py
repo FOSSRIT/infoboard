@@ -6,6 +6,7 @@ from urllib2 import HTTPError
 
 import requests
 import json
+import logging
 
 import data
 
@@ -54,5 +55,5 @@ class Github(object):
 if __name__ == "__main__":
     g = Github()
     users = g.organization_members('FOSSRIT')
-    print(users[0]['login'])
-    print(g.user_activity(users[0]['login']))
+    logging.info(users[0]['login'])
+    logging.info(g.user_activity(users[0]['login']))
