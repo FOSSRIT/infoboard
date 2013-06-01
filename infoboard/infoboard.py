@@ -284,15 +284,20 @@ class Hilight(Gtk.EventBox):
             'CommitCommentEvent': ('commented on', 'commits'),
             'CreateEvent': ('created', 'tags, branches, or repositories'),
             'DeleteEvent': ('deleted', 'tags, branches, or repositories'),
+            # DownloadEvent
             'FollowEvent': ('followed', 'users'),
             'ForkEvent': ('forked', 'repositories'),
+            'ForkApplyEvent': ('applied', 'patches'),
             'GistEvent': ('made or modified', 'gists'),
             'GollumEvent': ('made or modified', 'wiki pages'),
             'IssueCommentEvent': ('commented on', 'issues'),
             'IssuesEvent': ('made or modified', 'issues'),
+            'MemberEvent': ('added', 'collaborators'),
+            'PublicEvent': ('opened', 'repositories'),
             'PullRequestEvent': ('made or modified', 'pull requests'),
             'PullRequestReviewCommentEvent': ('commented on', 'pull requests'),
             'PushEvent': ('pushed', 'commits'),
+            'TeamAddEvent': ('added', 'users to teams'),
             'WatchEvent': ('watched', 'repositories'),
         }
 
