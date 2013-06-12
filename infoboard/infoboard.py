@@ -225,6 +225,7 @@ class EventWidget(Gtk.EventBox):
                         issue['number'], repo_link))
             event_text.append(issue[u'title'])
         elif event[u'type'] == "MemberEvent":
+            color = event_colors['social']
             try:
                 event_text.append("{0} added {1} as a collaborator to {2}."
                     .format(user_name, event['payload']['member']['name'],
