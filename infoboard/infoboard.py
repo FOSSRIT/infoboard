@@ -6,7 +6,7 @@ from __future__ import print_function, unicode_literals
 import os
 import re
 
-from urllib import urlretrieve
+import requests
 
 from gi.repository import Gtk, GdkPixbuf, Gdk, GObject
 
@@ -338,7 +338,9 @@ class Hilight(Gtk.EventBox):
 def url_to_image(url, filename, scale=1):
     local_path = os.path.join(base_dir, "image_cache", filename)
     if not os.path.exists(local_path):
-        urlretrieve(url, local_path)
+        r = requests.get(url)
+        with open(local_path, 'w') as image_file:
+            image_file.write(r.content)
     # Scale images to the desired size
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(local_path)
     size = scale * 100
