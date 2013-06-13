@@ -2,10 +2,11 @@
 Many calls to PyGithub hide lazy calls to the Github API.  These functions
 wrap the actual work so that the data returned can get cached in Knowledge.
 """
-from __future__ import print_function, unicode_literals
+from __future__ import unicode_literals
 
 from collections import defaultdict
 from datetime import datetime, timedelta
+import logging
 
 from knowledge.model import DBSession, Entity
 
@@ -57,7 +58,7 @@ def top_contributions():
 def event_info(event):
     event_name = u'event_{0}'.format(event['id'])
     if not Entity.by_name(event_name):
-        print("Caching new event {0}".format(event_name))
+        logging.info("Caching new event {0}".format(event_name))
         entity = Entity(event_name)
         entity['name'] = event_name
         entity[u'actor'] = user_info(event['actor']).name
@@ -80,7 +81,7 @@ def event_info(event):
 def user_info(user):
     user_name = u'user_{0}'.format(user['id'])
     if not Entity.by_name(user_name):
-        print("Caching new user {0}".format(user_name))
+        logging.info("Caching new user {0}".format(user_name))
         entity = Entity(user_name)
         DBSession.add(entity)
 
@@ -103,7 +104,7 @@ def repo_info(repo):
     repo_name = repo.get('full_name', '{0}/{1}'.format(repo['owner']['login'],
                                                        repo['name']))
     if not Entity.by_name(repo_name):
-        print("Caching new repository {0}".format(repo_name))
+        logging.info("Caching new repository {0}".format(repo_name))
         entity = Entity(repo_name)
         DBSession.add(entity)
 
@@ -124,7 +125,7 @@ def repo_info(repo):
 def comment_info(comment):
     comment_name = u'comment_{0}'.format(comment['id'])
     if not Entity.by_name(comment_name):
-        print("Caching new comment {0}".format(comment_name))
+        logging.info("Caching new comment {0}".format(comment_name))
         entity = Entity(comment_name)
         entity[u'body'] = comment['body']
         DBSession.add(entity)
@@ -135,7 +136,7 @@ def comment_info(comment):
 def issue_info(issue):
     issue_name = u'issue_{0}'.format(issue['id'])
     if not Entity.by_name(issue_name):
-        print("Caching new issue {0}".format(issue_name))
+        logging.info("Caching new issue {0}".format(issue_name))
         entity = Entity(issue_name)
         entity[u'title'] = issue['title']
         entity[u'number'] = issue['number']
