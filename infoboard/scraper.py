@@ -41,7 +41,6 @@ def cache_events(client, org):
 
 if __name__ == '__main__':
     loglog = logging.getLogger()
-    loglog.setLevel(logging.INFO)
     yaml_location = os.path.join(os.path.split(__file__)[0], 'settings.yaml')
     with open(yaml_location) as yaml_file:
         conf = yaml.load(yaml_file)
