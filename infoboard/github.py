@@ -23,7 +23,7 @@ class Github(object):
                 r = requests.get(url, auth=self.auth)
             else:
                 r = requests.get(url)
-        except requests.exception.ConnectionError:
+        except requests.exceptions.ConnectionError:
             return []
 
         self.rate_limiting = (r.headers['x-ratelimit-remaining'],
