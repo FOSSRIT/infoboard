@@ -101,6 +101,9 @@ def user_info(user):
 
 
 def repo_info(repo):
+    if not repo:
+        return
+
     repo_name = repo.get('full_name', '{0}/{1}'.format(repo['owner']['login'],
                                                        repo['name']))
     if not Entity.by_name(repo_name):
