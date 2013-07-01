@@ -30,9 +30,18 @@ class Github(object):
                               r.headers['x-ratelimit-limit'])
         if r.status_code == 404:
             r.raise_for_status()
+        
+        try:
+            payload = json.loads(escape(r.content))
+        except ValueError:
+            # JSON decoding failed
+            return dict()
+        if 'message' in payload:
+            # Github has a message for us but not a response
+            logging.error(payload)
+            return dict()
 
-        content = json.loads(escape(r.content))
-        return content
+        return payload
 
     def organization_members(self, org_name):
         members = self._requests_wrapper('https://api.github.com/orgs/%s/members' % org_name)
