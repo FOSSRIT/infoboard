@@ -87,9 +87,7 @@ def user_info(user):
 
     entity = Entity.by_name(user_name)
     entity['login'] = user['login']
-    entity['gravatar'] = user['gravatar_id']
-    entity['avatar'] = u'http://www.gravatar.com/avatar/{0}?s=200' \
-                         .format(user['gravatar_id'])
+    entity['avatar'] = user['avatar_url']
     # Not everyone has set a name for their account.
     if user.get('name'):
         entity[u'name'] = user['name']
